@@ -28,13 +28,15 @@ def avg_predict(claim, evidences=[]) -> str:
     labels = ["FACT", "MYTH", "SCAM"]
     return labels[scores.index(m)]
 
-if __name__ == "__main__":
-    claim = "The earth is flat."
-    evidences = [
-        "Scientific studies show that the earth is round.",
-        "Photos from space clearly depict a spherical earth.",
-        "The curvature of the earth is visible from high altitudes."
-    ]
+
+# if __name__ == "__main__":
     
-    result = avg_predict(claim, evidences)
-    print(f"The claim '{claim}' is classified as: {result}")
+#     claim = "The earth is flat."
+#     evidences = [
+#         "Scientific studies show that the earth is round.",
+#         "Photos from space clearly depict a spherical earth.",
+#         "The curvature of the earth is visible from high altitudes."
+#     ]
+    
+#     result = avg_predict(claim, evidences)
+#     print(f"The claim '{claim}' is classified as: {result}")
