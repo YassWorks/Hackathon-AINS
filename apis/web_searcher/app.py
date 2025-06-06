@@ -1,92 +1,70 @@
-import requests
-from bs4 import BeautifulSoup
-from googlesearch import search
-from urllib.parse import urlparse
-from .extract_keywords import extract_keywords
+from duckduckgo_search import DDGS
+import textwrap
 import re
 
-def is_reliable_source(url):
-    """
-    Check if the source is reliable based on domain characteristics.
-    Prioritizes .edu, .gov, .org, and reputable news outlets.
-    """
-    reliable_domains = [
-        '.edu', '.gov', '.org',
-        'bbc.com', 'nytimes.com', 'theguardian.com', 'reuters.com',
-        'npr.org', 'wsj.com', 'apnews.com', 'nature.com',
-        'sciencedirect.com', 'nih.gov', 'who.int'
-    ]
-    parsed_url = urlparse(url)
-    domain = parsed_url.netloc.lower()
-    return any(domain.endswith(d) for d in reliable_domains) or any(d in domain for d in reliable_domains)
 
-def clean_text(text):
-    """
-    Clean extracted text by removing extra whitespace and non-printable characters.
-    """
-    text = re.sub(r'\s+', ' ', text).strip()
-    text = re.sub(r'[^\x00-\x7F]+', '', text)
-    return text
-
-def extract_relevant_paragraph(url, statement_words):
-    """
-    Extract the most relevant paragraph(s) from a webpage that matches the statement.
-    """
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Remove scripts and styles to clean up content
-        for script in soup(["script", "style"]):
-            script.decompose()
-        
-        # Extract all paragraphs
-        paragraphs = soup.find_all(['p', 'div', 'span'])
-        relevant_text = ""
-        
-        # Find paragraphs containing statement keywords
-        for p in paragraphs:
-            text = p.get_text().strip()
-            if any(word in text.lower() for word in statement_words):
-                relevant_text += clean_text(text) + " "
-                if len(relevant_text.split()) > 100:  # Limit to ~100 words
-                    break
-        
-        return relevant_text.strip() if relevant_text else "SKIP"
-    except Exception as e:
-        return f"Error accessing {url}: {str(e)}"
-
-def search_statement(statement, num_results=10):
-    """
-    Search the web for a statement and return top reliable sources with relevant paragraphs.
-    """
-    results = {}
-    try:
-        statement_words=extract_keywords(statement)
-        print(statement_words)
-        
-        # Perform Google search
-        for url in search(statement, num_results=50, lang='en'):
-            if is_reliable_source(url):
-                paragraph = extract_relevant_paragraph(url, statement_words)
-                if "SKIP" in paragraph or "Error accessing" in paragraph:
-                    continue
-                if paragraph:
-                    results[url] = paragraph
-                if len(results) >= num_results:
-                    break
-    except Exception as e:
-        print(f"Error during search: {str(e)}")
-    return results
-
-def main():
-    sources = search_statement('the pharoah used to kill children and drink their blood in ancient egypt', 20)
+def search_duckduckgo(query, max_results=10):
     
-    print("\nTop Reliable Sources:")
-    for i, (url, paragraph) in enumerate(sources.items(), 1):
-        print(f"\n{i}. Source: {url}")
-        print(f"Excerpt: {paragraph}\n\n")
+    try:
+        snippets = []
+        with DDGS() as ddgs:
+            results = ddgs.text(query, max_results=max_results)
+            for r in results:
+                if r.get("body"):
+                    snippets.append(r["body"])
+                elif r.get("snippet"):
+                    snippets.append(r["snippet"])
+        return snippets
+    
+    except Exception as e:
+        print(f"Error during search: {e}")
+        return []
 
-if __name__ == "__main__":
-    main()
+
+def prettify(text, num_paragraphs=1):
+    
+    try:
+
+        paragraphs = []
+        chunks = textwrap.wrap(text, width=1000)[:num_paragraphs]  # limit to n chunks
+        
+        for chunk in chunks:
+            cleaned = re.sub(r'[^a-zA-Z0-9\s]', '', chunk)
+            cleaned = re.sub(r'\s+', ' ', cleaned)
+            cleaned = cleaned.strip()
+            paragraphs.append(cleaned)
+        
+        return paragraphs
+    
+    except Exception as e:
+        print(f"Error during summarization: {e}")
+        return ["Error summarizing the text."]
+
+
+def search_topic(topic, num_paragraphs=2):
+    
+    try:
+        print(f"🔍 Searching the web for: {topic}")
+        snippets = search_duckduckgo(topic, max_results=num_paragraphs*10)
+        
+        if not snippets:
+            return ["No relevant search results found."]
+        
+        combined_text = " ".join(snippets)
+        print(f"📚 Found {len(snippets)} snippets. Summarizing...")
+        return prettify(combined_text, num_paragraphs=num_paragraphs)
+    
+    except Exception as e:
+        print(f"Error in agent_search_topic: {e}")
+        return ["Error processing the topic."]
+
+
+# # Example usage
+# if __name__ == "__main__":
+    
+#     topic = "Impact of AI on modern education"
+#     parags = agent_search_topic(topic, num_paragraphs=20)
+    
+#     print("\n📄 Summary:")
+#     for i, para in enumerate(parags, 1):
+#         print(f"\nParagraph {i}:\n{para}")
