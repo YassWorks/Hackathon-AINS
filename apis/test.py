@@ -8,8 +8,4 @@ if is_claim(statement) != "claim":
 
 sources = search_topic(statement, num_paragraphs=20)
 
-result = avg_predict(statement, sources)
-
-print("\n\n" + "="*50)
-print(f"The claim '{statement}' is classified as: {result}")
-print("="*50 + "\n")
+result1 = avg_predict(statement, sources)
