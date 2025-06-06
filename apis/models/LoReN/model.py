@@ -19,7 +19,7 @@ def extract_phrases(claim):
 
 def classify_phrase(phrase):
     
-    labels = ["fact", "myth", "scam"]
+    labels = ["FACT", "MYTH", "SCAM"]
     result = classifier(phrase, labels, hypothesis_template="This statement is a {}.")
     return result['labels'][0].upper()
 
@@ -43,14 +43,12 @@ def evaluate_claim(claim):
     else:
         final_verdict = "MYTH"
     
-    return final_verdict, results
+    return final_verdict
 
 
 if __name__ == "__main__":
     
-    final_verdict, results = evaluate_claim("The Eiffel Tower was built in 1889 in Paris")
+    final_verdict = evaluate_claim("The Eiffel Tower was built in 1889 in Paris")
     print(f"\nFinal verdict: {final_verdict}")
     print("Detailed results:")
-    for phrase, classification in results.items():
-        print(f" - {phrase}: {classification}")
     

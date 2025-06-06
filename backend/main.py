@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-app = FastAPI(title="ANTI-SCAM APP")
+app = FastAPI(title="ANTI-SCAM BACKEND")
 
 @app.get("/")
 def read_root():
