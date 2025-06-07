@@ -61,7 +61,12 @@ export default function Home() {
             if (data.Success) {
                 setAnswer(data.Success);
                 setVerdict(data.Success);
-            } else {
+            }
+            else if (data.Error) {
+                setAnswer(data.Error);
+                setVerdict(data.Error);
+            } 
+            else {
                 // Fallback for unexpected response format
                 setAnswer(data.placeholder || "No response received");
                 setVerdict(null);
