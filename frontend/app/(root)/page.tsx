@@ -8,8 +8,9 @@ export default function Home() {
     const [file, setFile] = useState<FileList | null>(null);
     const [fileCount, setFileCount] = useState<number>(0);
     const [answer, setAnswer] = useState<string | null>(null);
+    const [isDragging, setIsDragging] = useState<boolean>(false);
     const inputRef = useRef<HTMLInputElement>(null);
-
+    
     const handleSubmit = async () => {
         
     };
@@ -18,18 +19,127 @@ export default function Home() {
         inputRef.current?.click();
     };
 
+    // Helper function to merge FileList objects
+    const mergeFileLists = (existingFiles: FileList | null, newFiles: FileList): FileList => {
+        const dataTransfer = new DataTransfer();
+        
+        // Add existing files
+        if (existingFiles) {
+            for (let i = 0; i < existingFiles.length; i++) {
+                dataTransfer.items.add(existingFiles[i]);
+            }
+        }
+        
+        // Add new files (check for duplicates by name and size)
+        for (let i = 0; i < newFiles.length; i++) {
+            const newFile = newFiles[i];
+            let isDuplicate = false;
+            
+            if (existingFiles) {
+                for (let j = 0; j < existingFiles.length; j++) {
+                    if (existingFiles[j].name === newFile.name && existingFiles[j].size === newFile.size) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+            }
+            
+            if (!isDuplicate) {
+                dataTransfer.items.add(newFile);
+            }
+        }
+        
+        return dataTransfer.files;
+    };
+
+    // Helper function to filter valid files
+    const filterValidFiles = (files: FileList): FileList => {
+        const validExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.mp3', '.wav', '.m4a', '.ogg'];
+        const validTypes = ['image/', 'audio/'];
+        const dataTransfer = new DataTransfer();
+        
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const isValidType = validTypes.some(type => file.type.startsWith(type));
+            const isValidExtension = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+            
+            if (isValidType || isValidExtension) {
+                dataTransfer.items.add(file);
+            }
+        }
+        
+        return dataTransfer.files;
+    };
+
     const getFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files;
-        setFile(selectedFile);
-        if (selectedFile) {
-            setFileCount(selectedFile.length);
-        } else {
-            setFileCount(0);
+        const selectedFiles = e.target.files;
+        if (selectedFiles) {
+            const validFiles = filterValidFiles(selectedFiles);
+            const mergedFiles = mergeFileLists(file, validFiles);
+            setFile(mergedFiles);
+            setFileCount(mergedFiles.length);
+        }
+    };    // Drag and drop handlers
+    const handleDragEnter = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Only hide overlay if we're leaving the main container
+        // Check if the related target is outside the current target
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        const x = e.clientX;
+        const y = e.clientY;
+        
+        // If mouse is outside the container bounds, hide the overlay
+        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+            setIsDragging(false);
         }
     };
 
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        // Ensure overlay stays visible
+        setIsDragging(true);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragging(false);
+        
+        const droppedFiles = e.dataTransfer.files;
+        if (droppedFiles && droppedFiles.length > 0) {
+            const validFiles = filterValidFiles(droppedFiles);
+            const mergedFiles = mergeFileLists(file, validFiles);
+            setFile(mergedFiles);
+            setFileCount(mergedFiles.length);
+        }
+    };    
+    
     return (
-        <div className="px-3 py-40 text-center">
+        <div 
+            className="px-3 py-40 text-center min-h-screen"
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+        >            {/* Drag overlay */}
+            {isDragging && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center pointer-events-none">
+                    <div className="bg-gradient-to-br from-stone-900 to-black text-white p-8 rounded-lg border-2 border-dashed border-white">
+                        <div className="text-2xl font-bold mb-2">Drop files here</div>
+                        <div className="text-sm opacity-70">Images and audio files only</div>
+                    </div>
+                </div>
+            )}
+            
             <div className="py-4 text-4xl font-bold">MYTH CHASER</div>
 
             <div className="relative w-full max-w-lg mx-auto">
