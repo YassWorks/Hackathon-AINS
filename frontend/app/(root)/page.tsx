@@ -9,18 +9,76 @@ export default function Home() {
     const [file, setFile] = useState<FileList | null>(null);
     const [fileCount, setFileCount] = useState<number>(0);
     const [answer, setAnswer] = useState<string | null>(null);
+    const [verdict, setVerdict] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState<boolean>(false);
     const [showFileList, setShowFileList] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    
-    const handleSubmit = async () => {};
+    // Helper function to get verdict color
+    const getVerdictColor = (verdict: string): string => {
+        const upperVerdict = verdict.toUpperCase();
+        if (upperVerdict === "FACT") return "text-green-400";
+        if (upperVerdict === "MYTH") return "text-orange-400";
+        if (upperVerdict === "SCAM") return "text-red-400";
+        return "text-white"; // default color
+    };
 
+    const handleSubmit = async () => {
+        if (!prompt.trim()) {
+            alert("Please enter a prompt.");
+            return;
+        }
+
+        if (isLoading) {
+            return; // Prevent multiple submissions
+        }
+
+        setIsLoading(true);
+        setAnswer(null);
+        setVerdict(null);
+
+        const formData = new FormData();
+        formData.append("prompt", prompt);
+
+        // Append all files to the FormData if any exist
+        if (file && file.length > 0) {
+            for (let i = 0; i < file.length; i++) {
+                formData.append("files", file[i]);
+            }
+        }
+
+        try {
+            const res = await fetch("http://localhost:8000/classify", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!res.ok) throw new Error("Upload failed");
+            const data = await res.json();
+            console.log("Response:", data);
+
+            if (data.Success) {
+                setAnswer(data.Success);
+                setVerdict(data.Success);
+            } else {
+                // Fallback for unexpected response format
+                setAnswer(data.placeholder || "No response received");
+                setVerdict(null);
+            }
+            const fileCount = file ? file.length : 0;
+            
+        } catch (err) {
+            console.error(err);
+            alert("Something went wrong!");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleClick = () => {
         inputRef.current?.click();
     };
-
 
     const removeFile = (indexToRemove: number) => {
         if (file) {
@@ -44,13 +102,11 @@ export default function Home() {
         }
     };
 
-
     const toggleFileList = () => {
         if (fileCount > 0) {
             setShowFileList(!showFileList);
         }
     };
-
 
     // Helper function to merge FileList objects
     const mergeFileLists = (
@@ -91,7 +147,6 @@ export default function Home() {
         return dataTransfer.files;
     };
 
-
     // Helper function to filter valid files
     const filterValidFiles = (files: FileList): FileList => {
         const validExtensions = [
@@ -125,7 +180,6 @@ export default function Home() {
         return dataTransfer.files;
     };
 
-
     const getFile = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = e.target.files;
         if (selectedFiles) {
@@ -134,9 +188,7 @@ export default function Home() {
             setFile(mergedFiles);
             setFileCount(mergedFiles.length);
         }
-
-    }; 
-    
+    };
 
     // Drag and drop handlers
     const handleDragEnter = (e: React.DragEvent) => {
@@ -144,7 +196,6 @@ export default function Home() {
         e.stopPropagation();
         setIsDragging(true);
     };
-
 
     const handleDragLeave = (e: React.DragEvent) => {
         e.preventDefault();
@@ -167,14 +218,12 @@ export default function Home() {
         }
     };
 
-
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
         // Ensure overlay stays visible
         setIsDragging(true);
     };
-
 
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
@@ -189,7 +238,6 @@ export default function Home() {
             setFileCount(mergedFiles.length);
         }
     };
-
 
     return (
         <div
@@ -216,24 +264,36 @@ export default function Home() {
             <div className="py-4 text-4xl font-bold">MYTH CHASER</div>
 
             <div className="relative w-full max-w-lg mx-auto">
+                {" "}
                 <textarea
                     placeholder="What fact do you want to check today?"
-                    className="w-full p-4 pr-12 rounded-md bg-gradient-to-br from-stone-900 to-black text-white placeholder-grey-400 resize-none focus:outline-none"
+                    className={`w-full p-4 pr-12 rounded-md bg-gradient-to-br from-stone-900 to-black text-white placeholder-grey-400 resize-none focus:outline-none ${
+                        isLoading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                     rows={4}
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
+                    disabled={isLoading}
                 ></textarea>
-
                 <button
                     onClick={handleSubmit}
-                    className="absolute top-4 right-4 z-10 bg-transparent hover:rotate-45 hover:scale-130 transition-transform cursor-pointer"
+                    disabled={isLoading}
+                    className={`absolute top-4 right-4 z-10 bg-transparent transition-transform ${
+                        isLoading
+                            ? "cursor-not-allowed opacity-50"
+                            : "hover:rotate-45 hover:scale-130 cursor-pointer"
+                    }`}
                 >
-                    <Image
-                        src="/submit.png"
-                        alt="submit"
-                        height={17}
-                        width={17}
-                    />
+                    {isLoading ? (
+                        <div className="w-[17px] h-[17px] border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                        <Image
+                            src="/submit.png"
+                            alt="submit"
+                            height={17}
+                            width={17}
+                        />
+                    )}
                 </button>
             </div>
 
@@ -241,7 +301,7 @@ export default function Home() {
                 <div className="flex items-center space-x-4">
                     <label className="text-white text-sm opacity-60">
                         Import photos and audio
-                    </label>
+                    </label>{" "}
                     <input
                         type="file"
                         accept="image/*,audio/*,.png,.jpg,.jpeg,.gif,.webp,.mp3,.wav,.m4a,.ogg"
@@ -249,10 +309,16 @@ export default function Home() {
                         className="hidden"
                         onChange={getFile}
                         ref={inputRef}
+                        disabled={isLoading}
                     />
                     <button
                         type="submit"
-                        className="px-4 py-2 bg-gradient-to-br from-stone-900 to-black text-white rounded-md transition-shadow shadow-md cursor-pointer hover:scale-110 transition-transform"
+                        disabled={isLoading}
+                        className={`px-4 py-2 bg-gradient-to-br from-stone-900 to-black text-white rounded-md transition-shadow shadow-md ${
+                            isLoading
+                                ? "cursor-not-allowed opacity-50"
+                                : "cursor-pointer hover:scale-110 transition-transform"
+                        }`}
                         onClick={handleClick}
                     >
                         <Image
@@ -280,6 +346,7 @@ export default function Home() {
             {showFileList && fileCount > 0 && (
                 <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
                     <div className="bg-gradient-to-br from-stone-900 via-stone-800 to-black text-white p-0 rounded-2xl max-w-lg w-full shadow-2xl border border-stone-600/50 transform transition-all duration-300 ease-out scale-100 opacity-100">
+
                         {/* Header */}
                         <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-6 py-4 rounded-t-2xl border-b border-stone-600/30">
                             <div className="flex justify-between items-center">
@@ -370,12 +437,53 @@ export default function Home() {
                     </div>
                 </div>
             )}
+            {" "}
 
             <div className="py-4">
-                {answer && (
-                    <div className="w-full max-w-lg mx-auto bg-gradient-to-br from-stone-900 to-black text-white p-4 rounded-md">
-                        <h2 className="text-xl font-bold">Response:</h2>
-                        <p>{answer}</p>
+                {isLoading && (
+                    <div className="w-full max-w-lg mx-auto bg-gradient-to-br from-stone-900 to-black text-white p-6 rounded-md">
+                        <div className="flex flex-col items-center space-y-4">
+                            <div className="flex items-center space-x-2">
+                                <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                                <div
+                                    className="w-2 h-2 bg-white rounded-full animate-bounce"
+                                    style={{ animationDelay: "0.1s" }}
+                                ></div>
+                                <div
+                                    className="w-2 h-2 bg-white rounded-full animate-bounce"
+                                    style={{ animationDelay: "0.2s" }}
+                                ></div>
+                            </div>
+                            <p className="text-lg font-medium">
+                                Analyzing your query...
+                            </p>
+                            <p className="text-sm text-stone-400">
+                                This may take a moment
+                            </p>
+                        </div>
+                    </div>
+                )}
+
+                {!isLoading && answer && (
+                    <div className="w-full max-w-lg mx-auto bg-gradient-to-br from-stone-900 to-black text-white p-4 rounded-md space-y-4">
+                        <div>
+                            <h2 className="text-xl font-bold">Response:</h2>
+                        </div>
+
+                        {verdict && (
+                            <div className="border-t border-stone-700 pt-4">
+                                <h3 className="text-lg font-semibold mb-2">
+                                    Final Verdict:
+                                </h3>
+                                <p
+                                    className={`text-xl font-bold ${getVerdictColor(
+                                        verdict
+                                    )}`}
+                                >
+                                    {verdict.toUpperCase()}
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
