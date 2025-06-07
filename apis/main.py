@@ -3,6 +3,7 @@ from helpers.utils import is_claim
 from models.NLI.model import avg_predict
 from models.LoReN.model import evaluate_claim
 from web_searcher.app import search_topic
+from models.ClaimBuster.model import verify_claim_claimbuster
 
 app = FastAPI(title="ANTI-SCAM API")
 
@@ -16,6 +17,7 @@ def verify_claim(statement: str):
 
     result1 = avg_predict(statement, sources)
     result2 = evaluate_claim(statement)
+    result3 = verify_claim_claimbuster(statement)
 
     # Voting logic
     labels = ["FACT", "MYTH", "SCAM"]
@@ -27,5 +29,11 @@ def verify_claim(statement: str):
 
     # LoReN
     probs[labels.index(result2)] += 1
+    
+    # ClaimBuster
+    probs[labels.index(result3)] += 1
 
-    return {"Success": probs[probs.index(max(probs))]}
+    return {"Success": labels[probs[probs.index(max(probs))]]}
+
+l = verify_claim("The earth is flat.")
+print(f"The claim 'The earth is flat.' is classified as: {l}")
