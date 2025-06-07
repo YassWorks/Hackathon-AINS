@@ -4,72 +4,127 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 
 export default function Home() {
+
     const [prompt, setPrompt] = useState<string>("");
     const [file, setFile] = useState<FileList | null>(null);
     const [fileCount, setFileCount] = useState<number>(0);
     const [answer, setAnswer] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState<boolean>(false);
+    const [showFileList, setShowFileList] = useState<boolean>(false);
     const inputRef = useRef<HTMLInputElement>(null);
+
     
-    const handleSubmit = async () => {
-        
-    };
+    const handleSubmit = async () => {};
+
 
     const handleClick = () => {
         inputRef.current?.click();
     };
 
+
+    const removeFile = (indexToRemove: number) => {
+        if (file) {
+            const dataTransfer = new DataTransfer();
+
+            // Add all files except the one to remove
+            for (let i = 0; i < file.length; i++) {
+                if (i !== indexToRemove) {
+                    dataTransfer.items.add(file[i]);
+                }
+            }
+
+            const newFileList = dataTransfer.files;
+            setFile(newFileList);
+            setFileCount(newFileList.length);
+
+            // Close the modal if no files left
+            if (newFileList.length === 0) {
+                setShowFileList(false);
+            }
+        }
+    };
+
+
+    const toggleFileList = () => {
+        if (fileCount > 0) {
+            setShowFileList(!showFileList);
+        }
+    };
+
+
     // Helper function to merge FileList objects
-    const mergeFileLists = (existingFiles: FileList | null, newFiles: FileList): FileList => {
+    const mergeFileLists = (
+        existingFiles: FileList | null,
+        newFiles: FileList
+    ): FileList => {
         const dataTransfer = new DataTransfer();
-        
+
         // Add existing files
         if (existingFiles) {
             for (let i = 0; i < existingFiles.length; i++) {
                 dataTransfer.items.add(existingFiles[i]);
             }
         }
-        
+
         // Add new files (check for duplicates by name and size)
         for (let i = 0; i < newFiles.length; i++) {
             const newFile = newFiles[i];
             let isDuplicate = false;
-            
+
             if (existingFiles) {
                 for (let j = 0; j < existingFiles.length; j++) {
-                    if (existingFiles[j].name === newFile.name && existingFiles[j].size === newFile.size) {
+                    if (
+                        existingFiles[j].name === newFile.name &&
+                        existingFiles[j].size === newFile.size
+                    ) {
                         isDuplicate = true;
                         break;
                     }
                 }
             }
-            
+
             if (!isDuplicate) {
                 dataTransfer.items.add(newFile);
             }
         }
-        
+
         return dataTransfer.files;
     };
 
+
     // Helper function to filter valid files
     const filterValidFiles = (files: FileList): FileList => {
-        const validExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.mp3', '.wav', '.m4a', '.ogg'];
-        const validTypes = ['image/', 'audio/'];
+        const validExtensions = [
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".gif",
+            ".webp",
+            ".mp3",
+            ".wav",
+            ".m4a",
+            ".ogg",
+        ];
+        const validTypes = ["image/", "audio/"];
         const dataTransfer = new DataTransfer();
-        
+
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
-            const isValidType = validTypes.some(type => file.type.startsWith(type));
-            const isValidExtension = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
-            
+            const isValidType = validTypes.some((type) =>
+                file.type.startsWith(type)
+            );
+            const isValidExtension = validExtensions.some((ext) =>
+                file.name.toLowerCase().endsWith(ext)
+            );
+
             if (isValidType || isValidExtension) {
                 dataTransfer.items.add(file);
             }
         }
-        
+
         return dataTransfer.files;
     };
+
 
     const getFile = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = e.target.files;
@@ -79,28 +134,39 @@ export default function Home() {
             setFile(mergedFiles);
             setFileCount(mergedFiles.length);
         }
-    };    // Drag and drop handlers
+
+    }; 
+    
+
+    // Drag and drop handlers
     const handleDragEnter = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(true);
     };
 
+
     const handleDragLeave = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         // Only hide overlay if we're leaving the main container
         // Check if the related target is outside the current target
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
         const x = e.clientX;
         const y = e.clientY;
-        
+
         // If mouse is outside the container bounds, hide the overlay
-        if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        if (
+            x < rect.left ||
+            x > rect.right ||
+            y < rect.top ||
+            y > rect.bottom
+        ) {
             setIsDragging(false);
         }
     };
+
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -109,11 +175,12 @@ export default function Home() {
         setIsDragging(true);
     };
 
+
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
         setIsDragging(false);
-        
+
         const droppedFiles = e.dataTransfer.files;
         if (droppedFiles && droppedFiles.length > 0) {
             const validFiles = filterValidFiles(droppedFiles);
@@ -121,25 +188,31 @@ export default function Home() {
             setFile(mergedFiles);
             setFileCount(mergedFiles.length);
         }
-    };    
-    
+    };
+
+
     return (
-        <div 
+        <div
             className="px-3 py-40 text-center min-h-screen"
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-        >            {/* Drag overlay */}
+        >
+            {/* Drag & Drop overlay */}
             {isDragging && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center pointer-events-none">
                     <div className="bg-gradient-to-br from-stone-900 to-black text-white p-8 rounded-lg border-2 border-dashed border-white">
-                        <div className="text-2xl font-bold mb-2">Drop files here</div>
-                        <div className="text-sm opacity-70">Images and audio files only</div>
+                        <div className="text-2xl font-bold mb-2">
+                            Drop files here
+                        </div>
+                        <div className="text-sm opacity-70">
+                            Images and audio files only
+                        </div>
                     </div>
                 </div>
             )}
-            
+
             <div className="py-4 text-4xl font-bold">MYTH CHASER</div>
 
             <div className="relative w-full max-w-lg mx-auto">
@@ -188,16 +261,116 @@ export default function Home() {
                             height="17"
                             width="17"
                         />
-                    </button>
-                    <div className="text-neutral-500 font-medium text-xs">
+                    </button>{" "}
+                    <div
+                        className="text-neutral-500 font-medium text-xs cursor-pointer hover:text-neutral-300 transition-colors"
+                        onClick={toggleFileList}
+                    >
                         {fileCount > 0 && (
                             <div>
-                                {fileCount} file{fileCount > 1 ? 's' : ''} selected
+                                {fileCount} file{fileCount > 1 ? "s" : ""}{" "}
+                                selected
                             </div>
                         )}
-                    </div>
+                    </div>{" "}
                 </div>
             </div>
+
+            {/* File List Modal */}
+            {showFileList && fileCount > 0 && (
+                <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-gradient-to-br from-stone-900 via-stone-800 to-black text-white p-0 rounded-2xl max-w-lg w-full shadow-2xl border border-stone-600/50 transform transition-all duration-300 ease-out scale-100 opacity-100">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-6 py-4 rounded-t-2xl border-b border-stone-600/30">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="text-xl font-bold text-white">
+                                        Selected Files
+                                    </h3>
+                                    <p className="text-sm text-stone-300">
+                                        {fileCount} file
+                                        {fileCount > 1 ? "s" : ""} ready to
+                                        upload
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowFileList(false)}
+                                    className="text-stone-400 hover:text-white hover:bg-stone-600 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200 text-xl font-bold"
+                                    title="Close"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* File List */}
+                        <div className="max-h-80 overflow-y-auto custom-scrollbar">
+                            <div className="p-2">
+                                {file &&
+                                    Array.from(file).map(
+                                        (selectedFile, index) => (
+                                            <div
+                                                key={index}
+                                                className="group flex items-center justify-between p-4 m-2 hover:bg-gradient-to-r hover:from-stone-700/50 hover:to-stone-600/50 rounded-xl transition-all duration-200 border border-transparent hover:border-stone-500/30"
+                                            >
+                                                <div className="flex items-center flex-1 min-w-0">
+                                                    <div className="text-sm font-semibold text-white truncate group-hover:text-blue-200 transition-colors">
+                                                        {selectedFile.name}
+                                                    </div>
+                                                    <div className="flex items-center space-x-2 mt-1">
+                                                        <span className="text-xs text-stone-400 bg-stone-800/50 px-2 py-1 rounded-full">
+                                                            {(
+                                                                selectedFile.size /
+                                                                1024
+                                                            ).toFixed(1)}{" "}
+                                                            KB
+                                                        </span>
+                                                        <span className="text-xs text-stone-500 capitalize">
+                                                            {selectedFile.type.split(
+                                                                "/"
+                                                            )[0] || "file"}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Remove Button */}
+                                                <button
+                                                    onClick={() =>
+                                                        removeFile(index)
+                                                    }
+                                                    className="ml-4 w-8 h-8 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 group-hover:opacity-100 opacity-70"
+                                                    title="Remove file"
+                                                >
+                                                    <span className="text-sm font-bold">
+                                                        ×
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        )
+                                    )}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-6 py-3 rounded-b-2xl border-t border-stone-600/30">
+                            <div className="flex justify-between items-center text-xs text-stone-300">
+                                <span>
+                                    Total:{" "}
+                                    {file
+                                        ? Array.from(file).reduce(
+                                              (acc, f) => acc + f.size,
+                                              0
+                                          ) / 1024
+                                        : 0}{" "}
+                                    KB
+                                </span>
+                                <span>Click × to remove files</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="py-4">
                 {answer && (
                     <div className="w-full max-w-lg mx-auto bg-gradient-to-br from-stone-900 to-black text-white p-4 rounded-md">
