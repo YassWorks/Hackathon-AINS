@@ -339,7 +339,7 @@ export default function Home() {
                             />
                         </button>{" "}
                         <div
-                            className="text-neutral-500 font-medium text-xs cursor-pointer hover:text-neutral-300 transition-colors"
+                            className="text-neutral-500 font-medium text-3xl cursor-pointer hover:text-neutral-300 transition-colors"
                             onClick={toggleFileList}
                         >
                             {fileCount > 0 && (
@@ -354,16 +354,16 @@ export default function Home() {
 
                 {/* File List Modal */}
                 {showFileList && fileCount > 0 && (
-                    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                        <div className="bg-gradient-to-br from-stone-900 via-stone-800 to-black text-white p-0 rounded-2xl max-w-lg w-full shadow-2xl border border-stone-600/50 transform transition-all duration-300 ease-out scale-100 opacity-100">
+                    <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-10 backdrop-blur-lg">
+                        <div className="bg-gradient-to-br from-stone-900 via-stone-800 to-black text-white p-0 rounded-3xl max-w-4xl w-full shadow-2xl border border-stone-600/50 transform transition-all duration-300 ease-out scale-100 opacity-100">
                             {/* Header */}
-                            <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-6 py-4 rounded-t-2xl border-b border-stone-600/30">
+                            <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-12 py-8 rounded-t-3xl border-b border-stone-600/30">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <h3 className="text-xl font-bold text-white">
+                                        <h3 className="text-3xl font-bold text-white">
                                             Selected Files
                                         </h3>
-                                        <p className="text-sm text-stone-300">
+                                        <p className="text-xl text-stone-300">
                                             {fileCount} file
                                             {fileCount > 1 ? "s" : ""} ready to
                                             upload
@@ -371,7 +371,7 @@ export default function Home() {
                                     </div>
                                     <button
                                         onClick={() => setShowFileList(false)}
-                                        className="text-stone-400 hover:text-white hover:bg-stone-600 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200 text-xl font-bold"
+                                        className="text-stone-400 hover:text-white hover:bg-stone-600 rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 text-3xl font-bold"
                                         title="Close"
                                     >
                                         ×
@@ -380,21 +380,21 @@ export default function Home() {
                             </div>
 
                             {/* File List */}
-                            <div className="max-h-80 overflow-y-auto custom-scrollbar">
-                                <div className="p-2">
+                            <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
+                                <div className="p-6">
                                     {file &&
                                         Array.from(file).map(
                                             (selectedFile, index) => (
                                                 <div
                                                     key={index}
-                                                    className="group flex items-center justify-between p-4 m-2 hover:bg-gradient-to-r hover:from-stone-700/50 hover:to-stone-600/50 rounded-xl transition-all duration-200 border border-transparent hover:border-stone-500/30"
+                                                    className="group flex items-center justify-between p-8 m-4 hover:bg-gradient-to-r hover:from-stone-700/50 hover:to-stone-600/50 rounded-2xl transition-all duration-200 border border-transparent hover:border-stone-500/30"
                                                 >
                                                     <div className="flex items-center flex-1 min-w-0">
-                                                        <div className="text-sm font-semibold text-white truncate group-hover:text-blue-200 transition-colors">
+                                                        <div className="text-xl font-semibold text-white truncate group-hover:text-blue-200 transition-colors">
                                                             {selectedFile.name}
                                                         </div>
-                                                        <div className="flex items-center space-x-2 mt-1">
-                                                            <span className="text-xs text-stone-400 bg-stone-800/50 px-2 py-1 rounded-full">
+                                                        <div className="flex items-center space-x-4 mt-2">
+                                                            <span className="text-lg text-stone-400 bg-stone-800/50 px-4 py-3 rounded-full">
                                                                 {(
                                                                     selectedFile.size / 1024
                                                                 ).toFixed(
@@ -402,7 +402,7 @@ export default function Home() {
                                                                 )}{" "}
                                                                 KB
                                                             </span>
-                                                            <span className="text-xs text-stone-500 capitalize">
+                                                            <span className="text-lg text-stone-500 capitalize">
                                                                 {selectedFile.type.split(
                                                                     "/"
                                                                 )[0] || "file"}
@@ -415,10 +415,10 @@ export default function Home() {
                                                         onClick={() =>
                                                             removeFile(index)
                                                         }
-                                                        className="ml-4 w-8 h-8 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 group-hover:opacity-100 opacity-70"
+                                                        className="ml-8 w-12 h-12 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 group-hover:opacity-100 opacity-80"
                                                         title="Remove file"
                                                     >
-                                                        <span className="text-sm font-bold">
+                                                        <span className="text-2xl font-bold">
                                                             ×
                                                         </span>
                                                     </button>
@@ -429,15 +429,17 @@ export default function Home() {
                             </div>
 
                             {/* Footer */}
-                            <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-6 py-3 rounded-b-2xl border-t border-stone-600/30">
-                                <div className="flex justify-between items-center text-xs text-stone-300">
+                            <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-12 py-6 rounded-b-3xl border-t border-stone-600/30">
+                                <div className="flex justify-between items-center text-lg text-stone-300">
                                     <span>
                                         Total:{" "}
                                         {file
-                                            ? Array.from(file).reduce(
-                                                  (acc, f) => acc + f.size,
-                                                  0
-                                              ) / 1024
+                                            ? (
+                                                  Array.from(file).reduce(
+                                                      (acc, f) => acc + f.size,
+                                                      0
+                                                  ) / 1024
+                                              ).toFixed(1)
                                             : 0}{" "}
                                         KB
                                     </span>
