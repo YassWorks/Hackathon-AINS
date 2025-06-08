@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 
 export default function Home() {
-
     const [prompt, setPrompt] = useState<string>("");
     const [file, setFile] = useState<FileList | null>(null);
     const [fileCount, setFileCount] = useState<number>(0);
@@ -61,18 +60,15 @@ export default function Home() {
             if (data.Success) {
                 setAnswer(data.Success);
                 setVerdict(data.Success);
-            }
-            else if (data.Error) {
+            } else if (data.Error) {
                 setAnswer(data.Error);
                 setVerdict(data.Error);
-            } 
-            else {
+            } else {
                 // Fallback for unexpected response format
                 setAnswer(data.placeholder || "No response received");
                 setVerdict(null);
             }
             const fileCount = file ? file.length : 0;
-            
         } catch (err) {
             console.error(err);
             alert("Something went wrong!");
@@ -266,232 +262,243 @@ export default function Home() {
                 </div>
             )}
 
-            <div className="py-4 text-4xl font-bold">MYTH CHASER</div>
+            <div>
 
-            <div className="relative w-full max-w-lg mx-auto">
-                {" "}
-                <textarea
-                    placeholder="What fact do you want to check today?"
-                    className={`w-full p-4 pr-12 rounded-md bg-gradient-to-br from-stone-900 to-black text-white placeholder-grey-400 resize-none focus:outline-none ${
-                        isLoading ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                    rows={4}
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    disabled={isLoading}
-                ></textarea>
-                <button
-                    onClick={handleSubmit}
-                    disabled={isLoading}
-                    className={`absolute top-4 right-4 z-10 bg-transparent transition-transform ${
-                        isLoading
-                            ? "cursor-not-allowed opacity-50"
-                            : "hover:rotate-45 hover:scale-130 cursor-pointer"
-                    }`}
-                >
-                    {isLoading ? (
-                        <div className="w-[17px] h-[17px] border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                        <Image
-                            src="/submit.png"
-                            alt="submit"
-                            height={17}
-                            width={17}
-                        />
-                    )}
-                </button>
-            </div>
-
-            <div className="py-4 flex flex-col items-center space-y-4">
-                <div className="flex items-center space-x-4">
-                    <label className="text-white text-sm opacity-60">
-                        Import photos and audio
-                    </label>{" "}
-                    <input
-                        type="file"
-                        accept="image/*,audio/*,.png,.jpg,.jpeg,.gif,.webp,.mp3,.wav,.m4a,.ogg"
-                        multiple
-                        className="hidden"
-                        onChange={getFile}
-                        ref={inputRef}
+                <div className="py-4 text-9xl font-bold animate-pulse text-transparent bg-clip-text bg-gradient-to-r from-brown-400 via-orange-500 to-yellow-500 drop-shadow-[0_0_10px_rgba(255,0,0,0.8)]">
+                    MYTH CHASER
+                </div>
+                <div className="py-4 text-4xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-brown-500 to-gray-500 drop-shadow-md">
+                    Anti-scam and myth-busting utility powered by AI
+                </div>
+                <br></br>
+                <br></br>
+                <div className="relative w-full max-w-3xl mx-auto">
+                    {" "}
+                    <textarea
+                        placeholder="What fact do you want to check?"
+                        className={`w-full p-4 pr-25 bg-stone-900 opacity-80 text-white rounded-lg shadow-md resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 text-2xl transition-all duration-200 ${
+                            isLoading
+                                ? "opacity-50 cursor-not-allowed"
+                                : "hover:shadow-lg"
+                        }`}
+                        rows={4}
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
                         disabled={isLoading}
-                    />
+                    ></textarea>
                     <button
-                        type="submit"
+                        onClick={handleSubmit}
                         disabled={isLoading}
-                        className={`px-4 py-2 bg-gradient-to-br from-stone-900 to-black text-white rounded-md transition-shadow shadow-md ${
+                        className={`absolute top-2 right-0 z-10 bg-transparent ${
                             isLoading
                                 ? "cursor-not-allowed opacity-50"
-                                : "cursor-pointer hover:scale-110 transition-transform"
+                                : "hover:scale-130 cursor-pointer"
                         }`}
-                        onClick={handleClick}
                     >
-                        <Image
-                            src="/upload.png"
-                            alt="upload"
-                            height="17"
-                            width="17"
-                        />
-                    </button>{" "}
-                    <div
-                        className="text-neutral-500 font-medium text-xs cursor-pointer hover:text-neutral-300 transition-colors"
-                        onClick={toggleFileList}
-                    >
-                        {fileCount > 0 && (
-                            <div>
-                                {fileCount} file{fileCount > 1 ? "s" : ""}{" "}
-                                selected
-                            </div>
+                        {isLoading ? (
+                            <div className="w-[32px] h-[32px] border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                            <Image
+                                src="/submit.png"
+                                alt="submit"
+                                height={100}
+                                width={100}
+                            />
                         )}
-                    </div>{" "}
+                    </button>
                 </div>
-            </div>
-
-            {/* File List Modal */}
-            {showFileList && fileCount > 0 && (
-                <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                    <div className="bg-gradient-to-br from-stone-900 via-stone-800 to-black text-white p-0 rounded-2xl max-w-lg w-full shadow-2xl border border-stone-600/50 transform transition-all duration-300 ease-out scale-100 opacity-100">
-
-                        {/* Header */}
-                        <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-6 py-4 rounded-t-2xl border-b border-stone-600/30">
-                            <div className="flex justify-between items-center">
+                <div className="py-4 flex flex-col items-center space-y-4">
+                    <div className="flex items-center space-x-4">
+                        <label className="text-white text-2xl opacity-60">
+                            Import photos and audio
+                        </label>{" "}
+                        <input
+                            type="file"
+                            accept="image/*,audio/*,.png,.jpg,.jpeg,.gif,.webp,.mp3,.wav,.m4a,.ogg"
+                            multiple
+                            className="hidden"
+                            onChange={getFile}
+                            ref={inputRef}
+                            disabled={isLoading}
+                        />
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className={` py-2 text-white rounded-md transition-shadow shadow-md ${
+                                isLoading
+                                    ? "cursor-not-allowed opacity-50"
+                                    : "cursor-pointer hover:scale-110 transition-transform"
+                            }`}
+                            onClick={handleClick}
+                        >
+                            <Image
+                                src="/upload.png"
+                                alt="upload"
+                                height={80}
+                                width={80}
+                            />
+                        </button>{" "}
+                        <div
+                            className="text-neutral-500 font-medium text-xs cursor-pointer hover:text-neutral-300 transition-colors"
+                            onClick={toggleFileList}
+                        >
+                            {fileCount > 0 && (
                                 <div>
-                                    <h3 className="text-xl font-bold text-white">
-                                        Selected Files
-                                    </h3>
-                                    <p className="text-sm text-stone-300">
-                                        {fileCount} file
-                                        {fileCount > 1 ? "s" : ""} ready to
-                                        upload
-                                    </p>
+                                    {fileCount} file{fileCount > 1 ? "s" : ""}{" "}
+                                    selected
                                 </div>
-                                <button
-                                    onClick={() => setShowFileList(false)}
-                                    className="text-stone-400 hover:text-white hover:bg-stone-600 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200 text-xl font-bold"
-                                    title="Close"
-                                >
-                                    ×
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* File List */}
-                        <div className="max-h-80 overflow-y-auto custom-scrollbar">
-                            <div className="p-2">
-                                {file &&
-                                    Array.from(file).map(
-                                        (selectedFile, index) => (
-                                            <div
-                                                key={index}
-                                                className="group flex items-center justify-between p-4 m-2 hover:bg-gradient-to-r hover:from-stone-700/50 hover:to-stone-600/50 rounded-xl transition-all duration-200 border border-transparent hover:border-stone-500/30"
-                                            >
-                                                <div className="flex items-center flex-1 min-w-0">
-                                                    <div className="text-sm font-semibold text-white truncate group-hover:text-blue-200 transition-colors">
-                                                        {selectedFile.name}
-                                                    </div>
-                                                    <div className="flex items-center space-x-2 mt-1">
-                                                        <span className="text-xs text-stone-400 bg-stone-800/50 px-2 py-1 rounded-full">
-                                                            {(
-                                                                selectedFile.size /
-                                                                1024
-                                                            ).toFixed(1)}{" "}
-                                                            KB
-                                                        </span>
-                                                        <span className="text-xs text-stone-500 capitalize">
-                                                            {selectedFile.type.split(
-                                                                "/"
-                                                            )[0] || "file"}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Remove Button */}
-                                                <button
-                                                    onClick={() =>
-                                                        removeFile(index)
-                                                    }
-                                                    className="ml-4 w-8 h-8 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 group-hover:opacity-100 opacity-70"
-                                                    title="Remove file"
-                                                >
-                                                    <span className="text-sm font-bold">
-                                                        ×
-                                                    </span>
-                                                </button>
-                                            </div>
-                                        )
-                                    )}
-                            </div>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-6 py-3 rounded-b-2xl border-t border-stone-600/30">
-                            <div className="flex justify-between items-center text-xs text-stone-300">
-                                <span>
-                                    Total:{" "}
-                                    {file
-                                        ? Array.from(file).reduce(
-                                              (acc, f) => acc + f.size,
-                                              0
-                                          ) / 1024
-                                        : 0}{" "}
-                                    KB
-                                </span>
-                                <span>Click × to remove files</span>
-                            </div>
-                        </div>
+                            )}
+                        </div>{" "}
                     </div>
                 </div>
-            )}
-            {" "}
 
-            <div className="py-4">
-                {isLoading && (
-                    <div className="w-full max-w-lg mx-auto bg-gradient-to-br from-stone-900 to-black text-white p-6 rounded-md">
-                        <div className="flex flex-col items-center space-y-4">
-                            <div className="flex items-center space-x-2">
-                                <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
-                                <div
-                                    className="w-2 h-2 bg-white rounded-full animate-bounce"
-                                    style={{ animationDelay: "0.1s" }}
-                                ></div>
-                                <div
-                                    className="w-2 h-2 bg-white rounded-full animate-bounce"
-                                    style={{ animationDelay: "0.2s" }}
-                                ></div>
+                {/* File List Modal */}
+                {showFileList && fileCount > 0 && (
+                    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                        <div className="bg-gradient-to-br from-stone-900 via-stone-800 to-black text-white p-0 rounded-2xl max-w-lg w-full shadow-2xl border border-stone-600/50 transform transition-all duration-300 ease-out scale-100 opacity-100">
+                            {/* Header */}
+                            <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-6 py-4 rounded-t-2xl border-b border-stone-600/30">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white">
+                                            Selected Files
+                                        </h3>
+                                        <p className="text-sm text-stone-300">
+                                            {fileCount} file
+                                            {fileCount > 1 ? "s" : ""} ready to
+                                            upload
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowFileList(false)}
+                                        className="text-stone-400 hover:text-white hover:bg-stone-600 rounded-full w-8 h-8 flex items-center justify-center transition-all duration-200 text-xl font-bold"
+                                        title="Close"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
                             </div>
-                            <p className="text-lg font-medium">
-                                Analyzing your query...
-                            </p>
-                            <p className="text-sm text-stone-400">
-                                This may take a moment
-                            </p>
+
+                            {/* File List */}
+                            <div className="max-h-80 overflow-y-auto custom-scrollbar">
+                                <div className="p-2">
+                                    {file &&
+                                        Array.from(file).map(
+                                            (selectedFile, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="group flex items-center justify-between p-4 m-2 hover:bg-gradient-to-r hover:from-stone-700/50 hover:to-stone-600/50 rounded-xl transition-all duration-200 border border-transparent hover:border-stone-500/30"
+                                                >
+                                                    <div className="flex items-center flex-1 min-w-0">
+                                                        <div className="text-sm font-semibold text-white truncate group-hover:text-blue-200 transition-colors">
+                                                            {selectedFile.name}
+                                                        </div>
+                                                        <div className="flex items-center space-x-2 mt-1">
+                                                            <span className="text-xs text-stone-400 bg-stone-800/50 px-2 py-1 rounded-full">
+                                                                {(
+                                                                    selectedFile.size / 1024
+                                                                ).toFixed(
+                                                                    1
+                                                                )}{" "}
+                                                                KB
+                                                            </span>
+                                                            <span className="text-xs text-stone-500 capitalize">
+                                                                {selectedFile.type.split(
+                                                                    "/"
+                                                                )[0] || "file"}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Remove Button */}
+                                                    <button
+                                                        onClick={() =>
+                                                            removeFile(index)
+                                                        }
+                                                        className="ml-4 w-8 h-8 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 group-hover:opacity-100 opacity-70"
+                                                        title="Remove file"
+                                                    >
+                                                        <span className="text-sm font-bold">
+                                                            ×
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                            )
+                                        )}
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-6 py-3 rounded-b-2xl border-t border-stone-600/30">
+                                <div className="flex justify-between items-center text-xs text-stone-300">
+                                    <span>
+                                        Total:{" "}
+                                        {file
+                                            ? Array.from(file).reduce(
+                                                  (acc, f) => acc + f.size,
+                                                  0
+                                              ) / 1024
+                                            : 0}{" "}
+                                        KB
+                                    </span>
+                                    <span>Click × to remove files</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
-
-                {!isLoading && answer && (
-                    <div className="w-full max-w-lg mx-auto bg-gradient-to-br from-stone-900 to-black text-white p-4 rounded-md space-y-4">
-                        <div>
-                            <h2 className="text-xl font-bold">Response:</h2>
-                        </div>
-
-                        {verdict && (
-                            <div className="border-t border-stone-700 pt-4">
-                                <h3 className="text-lg font-semibold mb-2">
-                                    Final Verdict:
-                                </h3>
-                                <p
-                                    className={`text-xl font-bold ${getVerdictColor(
-                                        verdict
-                                    )}`}
-                                >
-                                    {verdict.toUpperCase()}
+                
+                {" "}
+                <div className="py-4">
+                    {isLoading && (
+                        <div className="w-full max-w-lg mx-auto bg-stone-900 opacity-90 to-black text-white p-6 rounded-md">
+                            <div className="flex flex-col items-center space-y-4">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                                    <div
+                                        className="w-2 h-2 bg-white rounded-full animate-bounce"
+                                        style={{ animationDelay: "0.1s" }}
+                                    ></div>
+                                    <div
+                                        className="w-2 h-2 bg-white rounded-full animate-bounce"
+                                        style={{ animationDelay: "0.2s" }}
+                                    ></div>
+                                </div>
+                                <p className="text-lg font-medium">
+                                    Analyzing your query...
+                                </p>
+                                <p className="text-sm text-stone-400">
+                                    This may take a moment
                                 </p>
                             </div>
-                        )}
-                    </div>
-                )}
+                        </div>
+                    )}
+
+                    {!isLoading && answer && (
+                        <div className="w-full max-w-lg mx-auto bg-stone-900 opacity-90 text-white p-4 rounded-md space-y-4">
+                            <div>
+                                <h2 className="text-xl font-bold">Response:</h2>
+                            </div>
+
+                            {verdict && (
+                                <div className="border-t border-stone-700 pt-4">
+                                    <h3 className="text-lg font-semibold mb-2">
+                                        Final Verdict:
+                                    </h3>
+                                    <p
+                                        className={`text-xl font-bold ${getVerdictColor(
+                                            verdict
+                                        )}`}
+                                    >
+                                        {verdict.toUpperCase()}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
+
         </div>
     );
 }
