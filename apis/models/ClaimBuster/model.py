@@ -1,13 +1,6 @@
 import requests
-import json
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
-
-api_key = os.getenv("API_KEY")
-
-def verify_claim_claimbuster(input_claim, verbose=False):
+def verify_claim_claimbuster(input_claim, api_key):
     
     try:
         # defining the URL and the payload
@@ -18,12 +11,12 @@ def verify_claim_claimbuster(input_claim, verbose=False):
         api_response = requests.post(url=api_endpoint, json=payload, headers=request_headers)
 
         result = api_response.json()
-
-        if verbose:
-            print("[INFO]: API Response:")
-            print(json.dumps(result, indent=4))
         
-        score = result.get("results", None)[0]["score"]
+        if "results" in result:
+            score = result.get("results", None)[0]["score"]
+        else:
+            print("[ERROR]: Unexpected API response format.")
+            return "UNCERTAIN"
 
         # Defining rules for the score
         
@@ -32,11 +25,11 @@ def verify_claim_claimbuster(input_claim, verbose=False):
         # If the score is less than 0.4, we consider it a SCAM.
 
         print(f"The score is: {score}")
-        if score > 0.7:
+        if score >= 0.5:
             classification = "FACT"
-        elif 0.4 <= score <= 0.7:
+        elif 0.25 <= score < 0.5:
             classification = "MYTH"
-        elif score < 0.4:
+        elif score < 0.25:
             classification = "SCAM"
             
         return classification
@@ -48,6 +41,6 @@ def verify_claim_claimbuster(input_claim, verbose=False):
 
 
 if __name__ == "__main__":
-    input_claim = "The Earth is flat."
+    input_claim = "Trump is president."
     classification = verify_claim_claimbuster(input_claim, verbose=True)
     print(f"The claim '{input_claim}' is classified as: {classification}")

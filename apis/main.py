@@ -11,7 +11,15 @@ from web_searcher.app import search_topic
 from models.ClaimBuster.model import verify_claim_claimbuster
 from models.SBERT.model import sbert_predict
 from models.Google.model import verify_claim_google_factcheck
-# from converters.converter import convert_to_text
+import threading
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
+CLAIM_BUSTER_API_KEY = os.getenv("CLAIMBUSTER_API_KEY")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 
 app = FastAPI(title="ANTI-SCAM API")
@@ -38,33 +46,7 @@ async def verify_claim(
     files: List[UploadFile] = File(None)
 ):
     try:
-        # Combine prompt with file content
         full_statement = prompt
-        
-        # Process uploaded files if any
-        if files:
-            ...
-            # file_contents = []
-            # for file in files:
-            #     if file.filename:
-            #         # Save file temporarily
-            #         with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(file.filename)[1]) as temp_file:
-            #             content = await file.read()
-            #             temp_file.write(content)
-            #             temp_file_path = temp_file.name
-                    
-            #         try:
-            #             # Convert file to text
-            #             file_text = convert_to_text(temp_file_path)
-            #             file_contents.append(f"File '{file.filename}': {file_text}")
-            #         except Exception as e:
-            #             file_contents.append(f"File '{file.filename}': Error processing - {str(e)}")
-            #         finally:
-            #             # Clean up temp file
-            #             os.unlink(temp_file_path)
-            
-            # if file_contents:
-            #     full_statement += "\n\nAdditional context from files:\n" + "\n".join(file_contents)
         
         # Check if it's a claim
         # if is_claim(full_statement) != "claim":
@@ -74,11 +56,44 @@ async def verify_claim(
         sources = search_topic(full_statement, num_paragraphs=20)
 
         # Get predictions from different models
-        result1 = avg_predict(full_statement, sources)
-        # result2 = evaluate_claim(full_statement, sources)
-        result3 = verify_claim_claimbuster(full_statement)
-        result4 = sbert_predict(full_statement, sources)
-        result5 = verify_claim_google_factcheck(full_statement)
+        result1, result2, result3, result4, result5 = None, None, None, None, None
+
+        def run_avg_predict():
+            nonlocal result1
+            result1 = avg_predict(full_statement, sources)
+
+        def run_evaluate_claim():
+            nonlocal result2
+            result2 = evaluate_claim(full_statement, sources)
+
+        def run_verify_claim_claimbuster():
+            nonlocal result3
+            result3 = verify_claim_claimbuster(full_statement, CLAIM_BUSTER_API_KEY)
+
+        def run_sbert_predict():
+            nonlocal result4
+            result4 = sbert_predict(full_statement, sources)
+
+        def run_verify_claim_google_factcheck():
+            nonlocal result5
+            result5 = verify_claim_google_factcheck(full_statement, GOOGLE_API_KEY)
+
+        # Create threads
+        threads = [
+            threading.Thread(target=run_avg_predict),
+            threading.Thread(target=run_evaluate_claim),
+            threading.Thread(target=run_verify_claim_claimbuster),
+            threading.Thread(target=run_sbert_predict),
+            threading.Thread(target=run_verify_claim_google_factcheck),
+        ]
+
+        # Start threads
+        for thread in threads:
+            thread.start()
+
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
 
         # Voting logic
         labels = ["FACT", "MYTH", "SCAM"]
@@ -88,7 +103,7 @@ async def verify_claim(
         if result1 != "UNCERTAIN":
             probs[labels.index(result1)] += 1
 
-        # # LoReN
+        # LoReN
         # if result2 != "UNKNOWN":
         #     probs[labels.index(result2)] += 1
         
@@ -102,7 +117,7 @@ async def verify_claim(
         if result5 != "UNKNOWN":
             probs[labels.index(result5)] += 1
 
-        print(f"Results: {result1}, {result3}, {result4}, {result5}")
+        print(f"Results: {result1}, {result2}, {result3}, {result4}, {result5}")
         final_verdict = labels[probs.index(max(probs))]
         return {"Success": final_verdict}
         

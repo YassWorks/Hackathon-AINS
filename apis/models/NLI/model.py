@@ -20,6 +20,7 @@ def predict_nli(claim, evidence):
 
 # classification based on given sources
 def avg_predict(claim, evidences=[], threshold=0.5):
+    
     if not evidences:
         return "NO_EVIDENCE"
     scores = torch.zeros(3)
@@ -30,8 +31,8 @@ def avg_predict(claim, evidences=[], threshold=0.5):
 
     max_score, idx = torch.max(scores, dim=0)
     labels = ["FACT", "MYTH", "SCAM"]
-    if max_score < threshold:
-        return "UNCERTAIN"
+    # if max_score < threshold:
+    #     return "UNCERTAIN"
     return labels[idx.item()]
 
 
