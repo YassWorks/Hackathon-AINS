@@ -4,6 +4,8 @@ from models.NLI.model import avg_predict
 from models.LoReN.model import evaluate_claim
 from web_searcher.app import search_topic
 from models.ClaimBuster.model import verify_claim_claimbuster
+from models.SBERT.model import sbert_predict
+from models.Google.model import verify_claim_google_factcheck
 
 app = FastAPI(title="ANTI-SCAM API")
 
@@ -18,6 +20,8 @@ def verify_claim(statement: str):
     result1 = avg_predict(statement, sources)
     result2 = evaluate_claim(statement)
     result3 = verify_claim_claimbuster(statement)
+    result4 = sbert_predict(statement, sources)
+    result5 = verify_claim_google_factcheck(statement, verbose=False)
 
     # Voting logic
     labels = ["FACT", "MYTH", "SCAM"]
@@ -32,6 +36,14 @@ def verify_claim(statement: str):
     
     # ClaimBuster
     probs[labels.index(result3)] += 1
+
+    # SBERT
+    if result4 != "UNKNOWN":
+        probs[labels.index(result4)] += 1
+
+    # Google Fact Check API
+    if result5 != "UNKNOWN":
+        probs[labels.index(result5)] += 1
 
     return {"Success": labels[probs[probs.index(max(probs))]]}
 
