@@ -19,7 +19,7 @@ def predict_nli(claim, evidence):
 
 
 # classification based on given sources
-def avg_predict(claim, evidences=[], threshold=0.6):
+def avg_predict(claim, evidences=[], threshold=0.5):
     if not evidences:
         return "NO_EVIDENCE"
     scores = torch.zeros(3)
