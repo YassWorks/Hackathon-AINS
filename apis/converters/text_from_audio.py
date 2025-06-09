@@ -11,3 +11,5 @@ def text_from_audio(audio_path: str) -> str:
             return "Could not understand audio."
         except sr.RequestError as e:
             return f"Speech recognition failed: {e}"
+        except Exception as e:
+            return f"An error occurred: {e}"

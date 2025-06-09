@@ -264,19 +264,20 @@ export default function Home() {
 
             <div>
 
-                <div className="py-4 text-9xl font-bold animate-pulse text-transparent bg-clip-text bg-gradient-to-r from-brown-400 via-orange-500 to-yellow-500 drop-shadow-[0_0_10px_rgba(255,0,0,0.8)]">
+                <div className="py-4 text-9xl font-bold text-gray-300">
                     MYTH CHASER
                 </div>
-                <div className="py-4 text-4xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-green-400 via-brown-500 to-gray-500 drop-shadow-md">
+                <div className="py-4 text-2xl font-medium text-gray-400">
                     Anti-scam and myth-busting utility powered by AI
                 </div>
+
                 <br></br>
                 <br></br>
                 <div className="relative w-full max-w-3xl mx-auto">
                     {" "}
                     <textarea
                         placeholder="What fact do you want to check?"
-                        className={`w-full p-4 pr-25 bg-stone-900 opacity-80 text-white rounded-lg shadow-md resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 text-2xl transition-all duration-200 ${
+                        className={`w-full p-4 pr-25 bg-stone-950 opacity-80 text-white rounded-lg shadow-md resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 text-2xl transition-all duration-200 ${
                             isLoading
                                 ? "opacity-50 cursor-not-allowed"
                                 : "hover:shadow-lg"
@@ -355,9 +356,10 @@ export default function Home() {
                 {/* File List Modal */}
                 {showFileList && fileCount > 0 && (
                     <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-10 backdrop-blur-lg">
-                        <div className="bg-gradient-to-br from-stone-900 via-stone-800 to-black text-white p-0 rounded-3xl max-w-4xl w-full shadow-2xl border border-stone-600/50 transform transition-all duration-300 ease-out scale-100 opacity-100">
+                        <div className="bg-stone-900 text-white p-0 rounded-xl max-w-4xl w-full shadow-2xl border border-stone-600/50 transform transition-all duration-300 ease-out scale-100 opacity-100">
+                        
                             {/* Header */}
-                            <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-12 py-8 rounded-t-3xl border-b border-stone-600/30">
+                            <div className="bg-stone-800 px-12 py-8 rounded-t-xl border-b border-stone-600/30">
                                 <div className="flex justify-between items-center">
                                     <div>
                                         <h3 className="text-3xl font-bold text-white">
@@ -371,10 +373,10 @@ export default function Home() {
                                     </div>
                                     <button
                                         onClick={() => setShowFileList(false)}
-                                        className="text-stone-400 hover:text-white hover:bg-stone-600 rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200 text-3xl font-bold"
+                                        className="text-stone-400 hover:text-white hover:bg-stone-600 w-8 h-8 flex items-center justify-center transition-all duration-200 text-3xl font-bold"
                                         title="Close"
                                     >
-                                        ×
+                                        X
                                     </button>
                                 </div>
                             </div>
@@ -387,12 +389,14 @@ export default function Home() {
                                             (selectedFile, index) => (
                                                 <div
                                                     key={index}
-                                                    className="group flex items-center justify-between p-8 m-4 hover:bg-gradient-to-r hover:from-stone-700/50 hover:to-stone-600/50 rounded-2xl transition-all duration-200 border border-transparent hover:border-stone-500/30"
+                                                    className="group flex items-center justify-between p-8 m-4 hover:bg-stone-700 rounded-xl transition-all duration-200 border border-transparent hover:border-stone-500/30"
                                                 >
                                                     <div className="flex items-center flex-1 min-w-0">
                                                         <div className="text-xl font-semibold text-white truncate group-hover:text-blue-200 transition-colors">
                                                             {selectedFile.name}
                                                         </div>
+                                                    </div>
+                                                    <div className="flex items-center flex-1 min-w-0">
                                                         <div className="flex items-center space-x-4 mt-2">
                                                             <span className="text-lg text-stone-400 bg-stone-800/50 px-4 py-3 rounded-full">
                                                                 {(
@@ -402,12 +406,14 @@ export default function Home() {
                                                                 )}{" "}
                                                                 KB
                                                             </span>
-                                                            <span className="text-lg text-stone-500 capitalize">
-                                                                {selectedFile.type.split(
-                                                                    "/"
-                                                                )[0] || "file"}
-                                                            </span>
                                                         </div>
+                                                    </div>
+                                                    <div className="flex items-center flex-1 min-w-0">
+                                                        <span className="text-lg text-stone-500 capitalize">
+                                                            {selectedFile.type.split(
+                                                                "/"
+                                                            )[0] || "file"}
+                                                        </span>
                                                     </div>
 
                                                     {/* Remove Button */}
@@ -415,13 +421,14 @@ export default function Home() {
                                                         onClick={() =>
                                                             removeFile(index)
                                                         }
-                                                        className="ml-8 w-12 h-12 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110 group-hover:opacity-100 opacity-80"
+                                                        className="ml-8 w-8 h-8 bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white flex items-center justify-center transition-all duration-200 hover:scale-110 group-hover:opacity-100 opacity-80"
                                                         title="Remove file"
                                                     >
                                                         <span className="text-2xl font-bold">
-                                                            ×
+                                                            X
                                                         </span>
                                                     </button>
+
                                                 </div>
                                             )
                                         )}
@@ -429,7 +436,7 @@ export default function Home() {
                             </div>
 
                             {/* Footer */}
-                            <div className="bg-gradient-to-r from-stone-800 to-stone-700 px-12 py-6 rounded-b-3xl border-t border-stone-600/30">
+                            <div className="bg-stone-800 to-stone-700 px-12 py-6 rounded-b-xl border-t border-stone-600/30">
                                 <div className="flex justify-between items-center text-lg text-stone-300">
                                     <span>
                                         Total:{" "}

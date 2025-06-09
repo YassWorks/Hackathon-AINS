@@ -6,7 +6,6 @@ import torch
 # Load models once (global initialization)
 caption_processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
 caption_model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
-emotion_classifier = pipeline("image-classification", model="nateraw/vit-age-classifier")
 
 def text_from_image(image_path: str) -> str:
     """
@@ -25,13 +24,9 @@ def text_from_image(image_path: str) -> str:
             generated_ids = caption_model.generate(**inputs)
         caption = caption_processor.decode(generated_ids[0], skip_special_tokens=True)
 
-        # 3. Emotion/Expression analysis
-        emotions = emotion_classifier(image)
-        top_emotion = max(emotions, key=lambda x: x['score'])['label']
-
-        # 4. Combine results
-        rich_text = f"Caption: {caption}\nEmotion: {top_emotion}\nOCR Text: {ocr_text}"
-        return rich_text
+        # 3. Combine results
+        final_text = f"Description: {caption}\nText: {ocr_text}"
+        return final_text
 
     except Exception as e:
-        return f"[ERROR] Failed to process image: {str(e)}"
+        return f"Failed to process image: {str(e)}"

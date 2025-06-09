@@ -26,12 +26,18 @@
 body {
     font-family: "Pixelify Sans", monospace;
     background: var(--background);
-    background-image: url('/bg.png');
-    background-size: 100%; /* Zoom out by making it larger than 100% */
+    background-image: url('/pattern.png');
+    background-size: 40%; /* Zoom out by making it larger than 100% */
     background-position: center;
-    background-repeat: no-repeat;
+    background-repeat: repeat;
     background-attachment: fixed;
     color: var(--foreground);
+    text-shadow: -10px 5px 2px rgb(0, 0, 0);
+}
+
+::selection {
+    background: rgba(251, 125, 0, 0.253);
+    color: white;
 }
 
 /* Custom scrollbar for file list modal */

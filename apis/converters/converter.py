@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-AUDIO_FORMATS = {'.wav', '.mp3', '.flac', '.aiff', '.m4a', '.ogg'}
+AUDIO_FORMATS = {'.wav', '.flac', '.aiff', '.aifc'}
 IMAGE_FORMATS = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.gif', '.webp'}
 TEXT_FORMATS = {'.txt', '.md', '.rtf', '.csv', '.json', '.xml', '.html'}
 

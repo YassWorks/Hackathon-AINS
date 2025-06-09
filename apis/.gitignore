@@ -3,3 +3,5 @@ datasets
 chunks.txt
 test*
 run_pipeline.py
+*.jpg
+*.wav
