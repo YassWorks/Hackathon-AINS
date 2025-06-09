@@ -9,6 +9,8 @@ from models.NLI.model import avg_predict
 from models.LoReN.model import evaluate_claim
 from web_searcher.app import search_topic
 from models.ClaimBuster.model import verify_claim_claimbuster
+from models.SBERT.model import sbert_predict
+from models.Google.model import verify_claim_google_factcheck
 # from converters.converter import convert_to_text
 
 
@@ -73,8 +75,10 @@ async def verify_claim(
 
         # Get predictions from different models
         result1 = avg_predict(full_statement, sources)
-        result2 = evaluate_claim(full_statement)
+        # result2 = evaluate_claim(full_statement, sources)
         result3 = verify_claim_claimbuster(full_statement)
+        result4 = sbert_predict(full_statement, sources)
+        result5 = verify_claim_google_factcheck(full_statement)
 
         # Voting logic
         labels = ["FACT", "MYTH", "SCAM"]
@@ -84,14 +88,21 @@ async def verify_claim(
         if result1 != "UNCERTAIN":
             probs[labels.index(result1)] += 1
 
-        # LoReN
-        probs[labels.index(result2)] += 1
+        # # LoReN
+        # if result2 != "UNKNOWN":
+        #     probs[labels.index(result2)] += 1
         
         # ClaimBuster
         if result3 != "UNCERTAIN":
             probs[labels.index(result3)] += 1
+        
+        if result4 != "UNKNOWN":
+            probs[labels.index(result4)] += 1
+        
+        if result5 != "UNKNOWN":
+            probs[labels.index(result5)] += 1
 
-        print(f"Results: {result1}, {result2}, {result3}")
+        print(f"Results: {result1}, {result3}, {result4}, {result5}")
         final_verdict = labels[probs.index(max(probs))]
         return {"Success": final_verdict}
         

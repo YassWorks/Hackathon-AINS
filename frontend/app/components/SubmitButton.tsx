@@ -18,11 +18,11 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({ onClick, isLoading }) => {
             }`}
         >
             <Image
-                    src="/submit.png"
-                    alt="submit"
-                    height={100}
-                    width={100}
-                />
+                src="/submit.png"
+                alt="submit"
+                height={100}
+                width={100}
+            />
         </button>
     );
 };

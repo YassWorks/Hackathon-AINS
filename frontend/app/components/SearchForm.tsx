@@ -27,6 +27,12 @@ const SearchForm: React.FC<SearchFormProps> = ({
                 value={prompt}
                 onChange={(e) => onPromptChange(e.target.value)}
                 disabled={isLoading}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        onSubmit();
+                    }
+                }}
             />
             <button
                 onClick={onSubmit}

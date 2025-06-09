@@ -24,10 +24,11 @@ def classify_phrase(phrase):
     return result['labels'][0].upper()
 
 
-def evaluate_claim(claim):
+def evaluate_claim(claim, sources: list[str]):
     
-    phrases = extract_phrases(claim)
-    print(f"\nClaim: {claim}\nExtracted phrases: {phrases}")
+    full = claim + " Evidence: " + " ".join(sources)
+    phrases = extract_phrases(full)
+    # print(f"\nClaim: {claim}\nExtracted phrases: {phrases}")
     
     results = {}
     for phrase in phrases:
@@ -46,9 +47,9 @@ def evaluate_claim(claim):
     return final_verdict
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     
-    final_verdict = evaluate_claim("The Eiffel Tower was built in 1889 in Paris")
-    print(f"\nFinal verdict: {final_verdict}")
-    print("Detailed results:")
+#     final_verdict = evaluate_claim("The Eiffel Tower was built in 1889 in Paris")
+#     print(f"\nFinal verdict: {final_verdict}")
+#     print("Detailed results:")
     
