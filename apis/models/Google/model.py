@@ -12,7 +12,6 @@ API_KEY = os.getenv("GOOGLE_API_KEY")
 def verify_claim_google_factcheck(claim, api_key):
     
     try:
-        
         url = "https://factchecktools.googleapis.com/v1alpha1/claims:search"
         params = {
             "query": claim,

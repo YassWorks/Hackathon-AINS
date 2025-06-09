@@ -19,7 +19,7 @@ def predict_nli(claim, evidence):
 
 
 # classification based on given sources
-def avg_predict(claim, evidences=[], threshold=0.5):
+def avg_predict(claim, evidences=[]):
     
     if not evidences:
         return "NO_EVIDENCE"
@@ -31,21 +31,5 @@ def avg_predict(claim, evidences=[], threshold=0.5):
 
     max_score, idx = torch.max(scores, dim=0)
     labels = ["FACT", "MYTH", "SCAM"]
-    # if max_score < threshold:
-    #     return "UNCERTAIN"
+    
     return labels[idx.item()]
-
-
-# if __name__ == "__main__":
-    
-#     claim = "Birds can fly."
-#     evidences = [
-#         "Most birds have wings and can fly.",
-#         "Birds are known for their ability to fly.",
-#         "The majority of birds are capable of flight, which is a key characteristic of the class Aves.",
-#         "While many birds can fly, there are exceptions such as flightless birds like the kiwi and emu.",
-#         "Birds are generally defined by their feathers and beaks, with flight being a common but not universal trait."
-#     ]
-    
-#     result = avg_predict(claim, evidences)
-#     print(f"The claim '{claim}' is classified as: {result}")

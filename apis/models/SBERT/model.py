@@ -3,7 +3,7 @@ import torch
 
 
 # Load SBERT model
-model = SentenceTransformer("all-MiniLM-L6-v2")  # Fast and lightweight, good performance
+model = SentenceTransformer("all-MiniLM-L6-v2")
 model.eval()
 
 
