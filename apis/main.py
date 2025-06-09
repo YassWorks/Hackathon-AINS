@@ -65,8 +65,8 @@ async def verify_claim(
             #     full_statement += "\n\nAdditional context from files:\n" + "\n".join(file_contents)
         
         # Check if it's a claim
-        if is_claim(full_statement) != "claim":
-            return {"Error": "The statement is not a claim, it's more like a subjective opinion. Please provide a valid claim."}
+        # if is_claim(full_statement) != "claim":
+        #     return {"Error": "The statement is not a claim, it's more like a subjective opinion. Please provide a valid claim."}
 
         # Search for sources
         sources = search_topic(full_statement, num_paragraphs=20)
