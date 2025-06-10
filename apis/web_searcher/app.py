@@ -59,12 +59,12 @@ def search_topic(topic, num_paragraphs=2):
         return ["Error processing the topic."]
 
 
-# # Example usage
-# if __name__ == "__main__":
+# Example usage
+if __name__ == "__main__":
     
-#     topic = "Impact of AI on modern education"
-#     parags = agent_search_topic(topic, num_paragraphs=20)
+    topic = "Impact of AI on modern education"
+    parags = search_topic(topic, num_paragraphs=20)
     
-#     print("\n📄 Summary:")
-#     for i, para in enumerate(parags, 1):
-#         print(f"\nParagraph {i}:\n{para}")
+    print("\n📄 Summary:")
+    for i, para in enumerate(parags, 1):
+        print(f"\nParagraph {i}:\n{para}")

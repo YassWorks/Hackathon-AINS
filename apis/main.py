@@ -48,7 +48,7 @@ async def verify_claim(
         sources = search_topic(full_statement, num_paragraphs=20)
 
         # Get predictions from different models
-        result1, result2, result3, result4 = None, None, None, None, None
+        result1, result2, result3, result4 = None, None, None, None
 
         def run_avg_predict():
             nonlocal result1
