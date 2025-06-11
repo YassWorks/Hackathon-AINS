@@ -29,7 +29,7 @@ export default function Home() {
         handleDrop,
     } = useFileUpload();
 
-    const { answer, verdict, isLoading, handleSubmit } = useFormSubmission();
+    const { answer, verdict, explanation, isLoading, handleSubmit } = useFormSubmission();
 
     const onSubmit = async () => {
         await handleSubmit(prompt, file);
@@ -73,12 +73,10 @@ export default function Home() {
                     file={file}
                     onClose={closeFileList}
                     onRemoveFile={removeFile}
-                />
-
-                <div className="py-4">
+                />                <div className="py-4">
                     {isLoading && <LoadingIndicator />}
                     {!isLoading && (
-                        <ResponseSection answer={answer} verdict={verdict} />
+                        <ResponseSection answer={answer} verdict={verdict} explanation={explanation} />
                     )}
                 </div>
             </div>

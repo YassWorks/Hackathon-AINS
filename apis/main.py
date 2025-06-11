@@ -116,11 +116,12 @@ async def verify_claim(
         print(f"Results: {result1}, {result2}, {result3}, {result4}, {result5}")
         final_verdict = labels[probs.index(max(probs))]
 
-        prompt = f"Explain why the following statement is a {final_verdict}. These are the arguments: {full_statement}. Sources: {', '.join(sources)}. Provide a detailed explanation."
+        prompt = f"Explain why the following statement is a {final_verdict}. These are the arguments: {full_statement}. Sources: {', '.join(sources[:3])}. Provide a detailed explanation."
 
         explanation = explain(prompt)
         
         return {"Success": {"Verdict": final_verdict, "Explanation": explanation}}
 
     except Exception as e:
-        return {"Error": f"An error occurred: {str(e)}"}
+        
+        return {"Error": "Internal Error, Our servers might be down."}

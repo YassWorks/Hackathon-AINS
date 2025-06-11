@@ -14,7 +14,7 @@ def explain(prompt):
         outputs = model.generate(**inputs, max_new_tokens=150)
         
         result = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        return result
+        return result[result.find("Solution:") + len("Solution:"):].strip()
     
     except Exception as e:
         print("Error in explain function:", e)

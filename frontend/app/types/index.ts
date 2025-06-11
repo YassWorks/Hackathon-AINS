@@ -4,13 +4,19 @@ export interface FormState {
     fileCount: number;
     answer: string | null;
     verdict: string | null;
+    explanation: string | null;
     isDragging: boolean;
     showFileList: boolean;
     isLoading: boolean;
 }
 
+export interface ApiSuccessResponse {
+    Verdict: string;
+    Explanation: string;
+}
+
 export interface ApiResponse {
-    Success?: string;
+    Success?: ApiSuccessResponse;
     Error?: string;
     placeholder?: string;
 }
