@@ -10,7 +10,8 @@ from models.SBERT.model import sbert_predict
 from models.Google.model import verify_claim_google_factcheck
 import threading
 from dotenv import load_dotenv
-from models.WinterForestStump.model import analyse_news_text 
+from models.FakeNewsDetector.model import classify_fake_news
+from models.Explainer.model import explain
 
 
 load_dotenv()
@@ -18,7 +19,6 @@ load_dotenv()
 
 CLAIM_BUSTER_API_KEY = os.getenv("CLAIMBUSTER_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-WinterForestStump_API_KEY = os.getenv("WINTERFOREST_STUMP_API_KEY")
 
 
 app = FastAPI(title="ANTI-SCAM API")
@@ -50,11 +50,7 @@ async def verify_claim(
         sources = search_topic(full_statement, num_paragraphs=20)
 
         # Get predictions from different models
-<<<<<<< HEAD
-        result1, result2, result3, result4 = None, None, None, None
-=======
         result1, result2, result3, result4, result5 = None, None, None, None, None
->>>>>>> shiaskoo
 
         def run_avg_predict():
             nonlocal result1
@@ -74,7 +70,7 @@ async def verify_claim(
 
         def run_winterforest_model():
             nonlocal result5
-            result5 = analyse_news_text(full_statement ,WinterForestStump_API_KEY) 
+            result5 = classify_fake_news(full_statement) 
 
         # Create threads
         threads = [
@@ -82,7 +78,7 @@ async def verify_claim(
             threading.Thread(target=run_verify_claim_claimbuster),
             threading.Thread(target=run_sbert_predict),
             threading.Thread(target=run_verify_claim_google_factcheck),
-            threading.Thread(target=run_winterforest_model),  # ← Added thread
+            threading.Thread(target=run_winterforest_model),
         ]
 
         # Start threads
@@ -113,19 +109,18 @@ async def verify_claim(
         if result4 != "UNKNOWN":
             probs[labels.index(result4)] += 1
 
-        # WinterForest Fake News Detector
-        winter_result = result5.get("classification", "UNKNOWN").upper()
-        if winter_result == "MYTH":
-            probs[labels.index("MYTH")] += 1
-        elif winter_result == "REAL":
-            probs[labels.index("FACT")] += 1
-        else:
-            winter_result = "UNCERTAIN"
+        # Fake News Detector
+        if result5 != "UNCERTAIN":
+            probs[labels.index(result5)] += 1
 
-        print(f"Results: {result1}, {result2}, {result3}, {result4}, {winter_result}")
+        print(f"Results: {result1}, {result2}, {result3}, {result4}, {result5}")
         final_verdict = labels[probs.index(max(probs))]
 
-        return {"Success": final_verdict}
+        prompt = f"Explain why the following statement is a {final_verdict}. These are the arguments: {full_statement}. Sources: {', '.join(sources)}. Provide a detailed explanation."
+
+        explanation = explain(prompt)
+        
+        return {"Success": {"Verdict": final_verdict, "Explanation": explanation}}
 
     except Exception as e:
         return {"Error": f"An error occurred: {str(e)}"}

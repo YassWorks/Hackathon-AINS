@@ -38,9 +38,3 @@ def verify_claim_claimbuster(input_claim, api_key):
         
         print(f"[ERROR]: An error occurred while verifying the claim using ClaimBuster: {e}")
         return "UNCERTAIN"
-
-
-if __name__ == "__main__":
-    input_claim = "Trump is president."
-    classification = verify_claim_claimbuster(input_claim, verbose=True)
-    print(f"The claim '{input_claim}' is classified as: {classification}")

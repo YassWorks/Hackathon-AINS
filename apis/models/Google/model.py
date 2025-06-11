@@ -60,9 +60,3 @@ def verify_claim_google_factcheck(claim, api_key):
     except Exception as e:
         print(f"An error occurred: {e}")
         return "UNKNOWN"
-
-
-if __name__ == "__main__":
-    test_claim = "5G causes cancer."
-    result = verify_claim_google_factcheck(test_claim, verbose=True)
-    print(f"The claim '{test_claim}' is classified as: {result}")

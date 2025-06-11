@@ -52,17 +52,3 @@ def sbert_predict(claim: str, evidences: list[str]) -> str:
         classification = "SCAM"
 
     return classification
-
-
-# Example usage
-if __name__ == "__main__":
-    
-    claim = "The Earth is flat."
-    evidences = [
-        "The Earth is round based on scientific evidence.",
-        "Satellite images confirm the Earth is spherical.",
-        "The curvature of the Earth is observable from a plane."
-    ]
-
-    prediction = sbert_predict(claim, evidences)
-    print(f"The claim '{claim}' is classified as: {prediction}")
