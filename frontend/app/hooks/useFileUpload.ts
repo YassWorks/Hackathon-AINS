@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FormState } from "../types";
+//import { FormState } from "../types";
 import {
     mergeFileLists,
     filterValidFiles,

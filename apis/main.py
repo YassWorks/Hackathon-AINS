@@ -10,6 +10,7 @@ from models.SBERT.model import sbert_predict
 from models.Google.model import verify_claim_google_factcheck
 import threading
 from dotenv import load_dotenv
+from models.WinterForestStump.model import analyse_news_text 
 
 
 load_dotenv()
@@ -17,6 +18,7 @@ load_dotenv()
 
 CLAIM_BUSTER_API_KEY = os.getenv("CLAIMBUSTER_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+WinterForestStump_API_KEY = os.getenv("WINTERFOREST_STUMP_API_KEY")
 
 
 app = FastAPI(title="ANTI-SCAM API")
@@ -42,13 +44,17 @@ async def verify_claim(
     files: List[UploadFile] = File(None)
 ):
     try:
-        full_statement = prompt # + context from the files (will add later)
+        full_statement = prompt  # + context from the files (will add later)
 
         # Search for sources
         sources = search_topic(full_statement, num_paragraphs=20)
 
         # Get predictions from different models
+<<<<<<< HEAD
         result1, result2, result3, result4 = None, None, None, None
+=======
+        result1, result2, result3, result4, result5 = None, None, None, None, None
+>>>>>>> shiaskoo
 
         def run_avg_predict():
             nonlocal result1
@@ -66,12 +72,17 @@ async def verify_claim(
             nonlocal result4
             result4 = verify_claim_google_factcheck(full_statement, GOOGLE_API_KEY)
 
+        def run_winterforest_model():
+            nonlocal result5
+            result5 = analyse_news_text(full_statement ,WinterForestStump_API_KEY) 
+
         # Create threads
         threads = [
             threading.Thread(target=run_avg_predict),
             threading.Thread(target=run_verify_claim_claimbuster),
             threading.Thread(target=run_sbert_predict),
             threading.Thread(target=run_verify_claim_google_factcheck),
+            threading.Thread(target=run_winterforest_model),  # ← Added thread
         ]
 
         # Start threads
@@ -89,23 +100,32 @@ async def verify_claim(
         # NLI
         if result1 != "UNCERTAIN":
             probs[labels.index(result1)] += 1
-        
+
         # ClaimBuster
         if result2 != "UNCERTAIN":
             probs[labels.index(result2)] += 1
-        
+
         # SBERT
         if result3 != "UNKNOWN":
             probs[labels.index(result3)] += 1
-        
+
         # Google Fact Check
         if result4 != "UNKNOWN":
             probs[labels.index(result4)] += 1
 
-        print(f"Results: {result1}, {result2}, {result3}, {result4}")
+        # WinterForest Fake News Detector
+        winter_result = result5.get("classification", "UNKNOWN").upper()
+        if winter_result == "MYTH":
+            probs[labels.index("MYTH")] += 1
+        elif winter_result == "REAL":
+            probs[labels.index("FACT")] += 1
+        else:
+            winter_result = "UNCERTAIN"
+
+        print(f"Results: {result1}, {result2}, {result3}, {result4}, {winter_result}")
         final_verdict = labels[probs.index(max(probs))]
-        
+
         return {"Success": final_verdict}
-        
+
     except Exception as e:
         return {"Error": f"An error occurred: {str(e)}"}
