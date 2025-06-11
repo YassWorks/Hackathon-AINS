@@ -1,0 +1,42 @@
+# Development Dockerfile optimized for uv
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
+
+# Set environment variables for development
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_COMPILE_BYTECODE=0 \
+    UV_LINK_MODE=copy
+
+# Set work directory
+WORKDIR /app
+
+# Install system dependencies for development
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    git \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the project configuration files first for better caching
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies only (not the project itself) for better layer caching
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --no-install-project
+
+# Copy the rest of the application code
+COPY . .
+
+# Install the project in development mode
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked
+
+# Place the virtual environment's bin directory at the front of PATH
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Expose port
+EXPOSE 8000
+
+# For development, run with reload
+CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

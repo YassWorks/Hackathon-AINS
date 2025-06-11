@@ -1,0 +1,83 @@
+[project]
+name = "ains-backend"
+version = "0.1.0"
+description = "Backend API for AINS"
+requires-python = ">=3.12"
+dependencies = [
+    "duckduckgo-search>=8.0.3",
+    "fastapi>=0.115.12",
+    "pillow>=11.2.1",
+    "pytesseract>=0.3.13",
+    "python-dotenv>=1.1.0",
+    "requests>=2.32.4",
+    "spacy>=3.8.7",
+    "speechrecognition>=3.14.3",
+    "torch>=2.7.1",
+    "torchaudio>=2.7.1",
+    "torchvision>=0.22.1",
+    "transformers>=4.52.4",
+    "uvicorn>=0.34.3",
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --strict-markers --disable-warnings"
+testpaths = [
+    ".",
+]
+python_files = "test_*.py"
+python_functions = "test_*"
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "test_*",
+    "venv/*",
+    "*/site-packages/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["models", "web_searcher", "converters"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true

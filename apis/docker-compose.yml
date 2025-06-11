@@ -1,0 +1,124 @@
+version: "3.8"
+
+services:
+  # Redis cache service
+  redis:
+    image: redis:7-alpine
+    container_name: ains_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # PostgreSQL database service
+  postgres:
+    image: postgres:15-alpine
+    container_name: ains_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ains_db
+      POSTGRES_USER: ains_user
+      POSTGRES_PASSWORD: ains_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ains_user -d ains_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  # AINS API service (Production)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ains_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://ains_user:ains_password@postgres:5432/ains_db
+      - REDIS_URL=redis://redis:6379
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://127.0.0.1:8080
+      - SECRET_KEY=your-super-secret-key-change-in-production
+      - CLAIMBUSTER_API_KEY=${CLAIMBUSTER_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # AINS API service (Development with hot reload)
+  api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: ains_api_dev
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      - DATABASE_URL=postgresql://ains_user:ains_password@postgres:5432/ains_db
+      - REDIS_URL=redis://redis:6379
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://127.0.0.1:8080,http://localhost:8001
+      - SECRET_KEY=your-super-secret-key-change-in-production
+      - CLAIMBUSTER_API_KEY=${CLAIMBUSTER_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Mount source code for development with hot reload
+      - .:/app
+      # Exclude the virtual environment to use the container's version
+      - /app/.venv
+    develop:
+      # Configure watch for docker compose watch command
+      watch:
+        # Sync the working directory with the /app directory in the container
+        - action: sync
+          path: .
+          target: /app
+          # Exclude the project virtual environment
+          ignore:
+            - .venv/
+        # Rebuild the image on changes to the pyproject.toml
+        - action: rebuild
+          path: ./pyproject.toml
+    profiles:
+      - dev
+  # Simple PWA frontend for testing
+  frontend:
+    build:
+      context: ../pwa
+      dockerfile: Dockerfile.build
+    container_name: ains_frontend
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+volumes:
+  redis_data:
+  postgres_data:

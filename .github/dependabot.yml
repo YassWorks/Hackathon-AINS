@@ -1,0 +1,45 @@
+security:
+  advisories:
+    - package-ecosystem: "npm"
+      directory: "/frontend"
+      schedule:
+        interval: "weekly"
+      open-pull-requests-limit: 5
+      reviewers:
+        - "AINS-team"
+      assignees:
+        - "AINS-team"
+      commit-message:
+        prefix: "security"
+        include: "scope"
+
+    - package-ecosystem: "pip"
+      directory: "/apis"
+      schedule:
+        interval: "weekly"
+      open-pull-requests-limit: 5
+      reviewers:
+        - "AINS-team"
+      assignees:
+        - "AINS-team"
+      commit-message:
+        prefix: "security"
+        include: "scope"
+
+    - package-ecosystem: "docker"
+      directory: "/apis"
+      schedule:
+        interval: "weekly"
+      open-pull-requests-limit: 3
+
+    - package-ecosystem: "docker"
+      directory: "/frontend"
+      schedule:
+        interval: "weekly"
+      open-pull-requests-limit: 3
+
+    - package-ecosystem: "github-actions"
+      directory: "/"
+      schedule:
+        interval: "weekly"
+      open-pull-requests-limit: 3

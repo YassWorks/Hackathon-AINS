@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AINS - AI Anti-Scam</title>
+    <meta
+      name="description"
+      content="AI-powered anti-scam and fact-checking application"
+    />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="AINS" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/masked-icon.svg" color="#000000" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding: 2rem 0;
+      }
+
+      .logo {
+        width: 80px;
+        height: 80px;
+        background: white;
+        border-radius: 20px;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      h1 {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        font-weight: 300;
+      }
+
+      .card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .input-container {
+        position: relative;
+      }
+
+      textarea {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e1e5e9;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 120px;
+        transition: border-color 0.3s ease;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .file-upload {
+        border: 2px dashed #e1e5e9;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+      }
+
+      .file-upload:hover {
+        border-color: #667eea;
+        background-color: #f8f9ff;
+      }
+
+      .file-upload.dragover {
+        border-color: #667eea;
+        background-color: #f0f4ff;
+      }
+
+      .upload-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #ccc;
+      }
+
+      .upload-text {
+        color: #666;
+        margin-bottom: 0.5rem;
+      }
+
+      .upload-subtext {
+        color: #999;
+        font-size: 0.9rem;
+      }
+
+      .file-list {
+        margin-top: 1rem;
+      }
+
+      .file-item {
+        display: flex;
+        align-items: center;
+        justify-content: between;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+      }
+
+      .file-name {
+        flex: 1;
+        font-size: 0.9rem;
+        color: #333;
+      }
+
+      .file-size {
+        color: #666;
+        font-size: 0.8rem;
+        margin-right: 1rem;
+      }
+
+      .remove-file {
+        background: #ff4757;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+
+      .submit-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        margin-top: 1rem;
+      }
+
+      .submit-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+      }
+
+      .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .loading {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .result {
+        display: none;
+        margin-top: 1.5rem;
+      }
+
+      .verdict {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        text-align: center;
+      }
+
+      .verdict.fact {
+        background: #d4edda;
+        color: #155724;
+        border: 2px solid #c3e6cb;
+      }
+
+      .verdict.myth {
+        background: #fff3cd;
+        color: #856404;
+        border: 2px solid #ffeaa7;
+      }
+
+      .verdict.scam {
+        background: #f8d7da;
+        color: #721c24;
+        border: 2px solid #f5c6cb;
+      }
+
+      .verdict.unknown {
+        background: #e2e3e5;
+        color: #383d41;
+        border: 2px solid #d6d8db;
+      }
+
+      .confidence {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 0.5rem;
+      }
+
+      .explanation {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        margin: 1rem 0;
+        line-height: 1.6;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .stat {
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #667eea;
+      }
+
+      .stat-label {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 0.25rem;
+      }
+
+      .sources {
+        margin-top: 1.5rem;
+      }
+
+      .sources h3 {
+        margin-bottom: 1rem;
+        color: #333;
+      }
+
+      .source-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 1rem;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+
+        .card {
+          padding: 1.5rem;
+        }
+      }
+
+      .install-prompt {
+        background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        text-align: center;
+        display: none;
+      }
+
+      .install-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="logo">🛡️</div>
+        <h1>AINS</h1>
+        <p class="subtitle">AI-powered anti-scam and fact-checking</p>
+      </header>
+
+      <div id="installPrompt" class="install-prompt">
+        <p>📱 Install AINS as an app for quick access</p>
+        <button id="installBtn" class="install-btn">Install App</button>
+      </div>
+
+      <div class="card">
+        <form id="factCheckForm">
+          <div class="form-group">
+            <label for="statement">Statement to verify:</label>
+            <div class="input-container">
+              <textarea
+                id="statement"
+                placeholder="Enter the claim, news, or message you want to fact-check..."
+                required
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Upload supporting files (optional):</label>
+            <div id="fileUpload" class="file-upload">
+              <div class="upload-icon">📁</div>
+              <div class="upload-text">Drag & drop files here</div>
+              <div class="upload-subtext">
+                or click to browse (images, audio files)
+              </div>
+              <input
+                type="file"
+                id="fileInput"
+                multiple
+                accept="image/*,audio/*"
+                style="display: none"
+              />
+            </div>
+            <div id="fileList" class="file-list"></div>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submitBtn">
+            🔍 Analyze Statement
+          </button>
+        </form>
+      </div>
+
+      <div id="loading" class="loading card">
+        <div class="spinner"></div>
+        <p>Analyzing your statement with AI models...</p>
+      </div>
+
+      <div id="result" class="result card">
+        <div id="verdict" class="verdict"></div>
+        <div id="explanation" class="explanation"></div>
+        <div class="stats">
+          <div class="stat">
+            <div id="confidenceValue" class="stat-value">-</div>
+            <div class="stat-label">Confidence</div>
+          </div>
+          <div class="stat">
+            <div id="processingTime" class="stat-value">-</div>
+            <div class="stat-label">Processing Time</div>
+          </div>
+          <div class="stat">
+            <div id="modelsUsed" class="stat-value">-</div>
+            <div class="stat-label">AI Models</div>
+          </div>
+        </div>
+        <div id="sources" class="sources" style="display: none">
+          <h3>📚 Sources Checked:</h3>
+          <div id="sourcesList"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

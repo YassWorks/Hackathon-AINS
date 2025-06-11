@@ -1,0 +1,87 @@
+# Makefile for AINS Docker Environment Management
+
+# Default environment
+ENV ?= docker
+
+# Docker Compose commands
+.PHONY: help build up down logs clean dev prod
+
+help: ## Show this help message
+	@echo "Available commands:"
+	@echo "  make dev          - Start development environment"
+	@echo "  make prod         - Start production environment"
+	@echo "  make build        - Build all containers"
+	@echo "  make up           - Start containers with docker environment"
+	@echo "  make down         - Stop and remove containers"
+	@echo "  make logs         - View container logs"
+	@echo "  make clean        - Clean up containers, networks, and volumes"
+	@echo "  make setup-env    - Copy environment file templates"
+
+# Development environment
+dev: ## Start development environment
+	@echo "Starting development environment..."
+	@cd apis && docker-compose --env-file ../.env.docker up --build -d
+	@echo "Services started:"
+	@echo "  - API: http://localhost:8000"
+	@echo "  - Frontend: http://localhost:3000"
+	@echo "  - Redis: localhost:6379"
+	@echo "  - PostgreSQL: localhost:5432"
+
+# Production environment
+prod: ## Start production environment
+	@echo "Starting production environment..."
+	@cd apis && docker-compose --env-file ../.env.production --profile production up --build -d
+	@echo "Production services started with Nginx reverse proxy"
+
+# Build containers
+build: ## Build all containers
+	@echo "Building containers..."
+	@cd apis && docker-compose --env-file ../.env.$(ENV) build
+
+# Start containers
+up: ## Start containers
+	@echo "Starting containers with $(ENV) environment..."
+	@cd apis && docker-compose --env-file ../.env.$(ENV) up -d
+
+# Stop containers
+down: ## Stop and remove containers
+	@echo "Stopping containers..."
+	@cd apis && docker-compose down
+
+# View logs
+logs: ## View container logs
+	@cd apis && docker-compose logs -f
+
+# Clean up everything
+clean: ## Clean up containers, networks, and volumes
+	@echo "Cleaning up Docker resources..."
+	@cd apis && docker-compose down -v --remove-orphans
+	@docker system prune -f
+	@echo "Cleanup completed"
+
+# Setup environment files
+setup-env: ## Copy environment file templates
+	@echo "Setting up environment files..."
+	@if not exist .env.docker (copy .env.example .env.docker)
+	@if not exist .env.production (copy .env.example .env.production)
+	@echo "Environment files created. Please edit them with your actual values."
+
+# Health check
+health: ## Check container health
+	@echo "Checking container health..."
+	@cd apis && docker-compose ps
+
+# Database management
+db-reset: ## Reset database (WARNING: This will delete all data)
+	@echo "Resetting database..."
+	@cd apis && docker-compose stop postgres
+	@cd apis && docker-compose rm -f postgres
+	@docker volume rm apis_postgres_data
+	@cd apis && docker-compose up -d postgres
+	@echo "Database reset completed"
+
+# Backup database
+db-backup: ## Backup database
+	@echo "Creating database backup..."
+	@cd apis && docker-compose exec postgres pg_dump -U ains_user ains_db > backup_$(shell date +%Y%m%d_%H%M%S).sql
+	@echo "Database backup created"

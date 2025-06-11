@@ -1,0 +1,78 @@
+name: Security Scanning
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Run every Monday at 6 AM
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  dependency-scan:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        language: [python, javascript]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Secret Scanner
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  container-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image for scanning
+        run: docker build -t backend-scan ./apis
+
+      - name: Build frontend image for scanning
+        run: docker build -t frontend-scan ./frontend
+
+      - name: Scan backend image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "backend-scan"
+          format: "sarif"
+          output: "backend-trivy-results.sarif"
+
+      - name: Scan frontend image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "frontend-scan"
+          format: "sarif"
+          output: "frontend-trivy-results.sarif"
+
+      - name: Upload backend scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "backend-trivy-results.sarif"
+          category: "backend-container-scan"
+
+      - name: Upload frontend scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: "frontend-trivy-results.sarif"
+          category: "frontend-container-scan"

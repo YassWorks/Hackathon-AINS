@@ -69,10 +69,10 @@ def convert_to_text(file_path: Union[str, Path], media_type: Optional[str] = Non
             f"Unsupported file format: {file_path.suffix}\n"
             f"Supported formats: {supported}"
         )
-    
     try:
         if media_type == 'audio':
-            return text_from_audio(str(file_path))
+            # Audio processing is disabled - return informative message
+            return "Audio processing is currently disabled. Please convert your audio file to text using an external tool and upload as a text file, or use image/text input instead."
         elif media_type == 'image':
             return text_from_image(str(file_path))
         elif media_type == 'text':
