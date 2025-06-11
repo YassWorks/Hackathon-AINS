@@ -9,6 +9,7 @@ torchaudio
 
 duckduckgo-search
 requests
+groq
 
 Pillow
 pytesseract
