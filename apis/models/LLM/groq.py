@@ -237,6 +237,8 @@ def explain(claims: List[str], verdict: str, apikey: str, sources: List[str] = N
         
         response_text = completion.choices[0].message.content.strip()
         
+        response_text = response_text[response_text.find('"explanation":')+len('"explanation":'):response_text.rfind('}')].strip()
+        
         # Return the explanation text
         return response_text
                 
