@@ -1,25 +1,24 @@
 import os
 from groq import Groq
-from typing import List, Dict, Optional
+from typing import List, Dict
 import json
 from dotenv import load_dotenv
 import time
 from threading import Lock
 from collections import deque
 
+
 load_dotenv(override=True)
 
-# Initialize Groq client
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
- 
 # Rate limiter: max 50 requests per 60 seconds
 _MAX_REQUESTS = 50
 _WINDOW = 60  # seconds
 _request_lock = Lock()
 _request_timestamps = deque()
 
-def classify_claim_with_groq(claim: str, sources: List[str] = None) -> Dict[str, any]:
+
+def classify_claim_with_groq(claim: str, apikey: str, sources: List[str] = None) -> Dict[str, any]:
     """
     Use Groq's Qwen3-32B model to verify claims with sophisticated reasoning.
     
@@ -31,6 +30,9 @@ def classify_claim_with_groq(claim: str, sources: List[str] = None) -> Dict[str,
         Dict[str, any]: Classification result with reasoning
     """
     try:
+        # Initialize Groq client
+        client = Groq(api_key=apikey)
+        
         # Prepare context from sources
         context = ""
         if sources and len(sources) > 0:
@@ -83,6 +85,7 @@ Focus on accuracy, logical reasoning, and evidence-based conclusions."""
                 while _request_timestamps and _request_timestamps[0] <= now - _WINDOW:
                     _request_timestamps.popleft()
             _request_timestamps.append(now)
+        
         # Call Groq API with Qwen3-32B model
         completion = client.chat.completions.create(
             model="qwen/qwen3-32b",  
@@ -160,7 +163,8 @@ Focus on accuracy, logical reasoning, and evidence-based conclusions."""
             "error": str(e)
         }
 
-def groq_fact_check(claim: str, sources: List[str] = None) -> str:
+
+def groq_fact_check(claim: str, apikey: str, sources: List[str] = None) -> str:
     """
     Main fact-checking function compatible with the existing API structure.
     
@@ -172,68 +176,70 @@ def groq_fact_check(claim: str, sources: List[str] = None) -> str:
         str: "FACT", "MYTH", "SCAM", or "UNCERTAIN"
     """
     try:
-        result = classify_claim_with_groq(claim, sources)
-        
-        # Apply confidence threshold
-        if result.get("confidence", 0) < 0.4:
-            return "UNCERTAIN"
+        result = classify_claim_with_groq(claim, apikey, sources)
             
         return result.get("classification", "UNCERTAIN")
         
     except Exception as e:
         print(f"Error in Groq fact check: {str(e)}")
         return "UNCERTAIN"
+    
 
-def get_detailed_groq_analysis(claim: str, sources: List[str] = None) -> Dict[str, any]:
+def explain(claims: List[str], verdict: str, apikey: str, sources: List[str] = None):
     """
-    Get detailed analysis results from Groq for debugging/transparency.
+    Generate an explanation for the classification using Groq.
     
     Args:
-        claim (str): The claim to analyze
+        claim (str): The claim being explained
+        verdict (str): The classification verdict ("FACT", "MYTH", "SCAM")
         sources (List[str], optional): List of source texts for context
         
     Returns:
-        Dict[str, any]: Detailed analysis results
+        str: Explanation text
     """
-    return classify_claim_with_groq(claim, sources)
-
-def batch_analyze_claims(claims: List[str], sources: List[str] = None) -> List[Dict[str, any]]:
-    """
-    Analyze multiple claims in batch for efficiency.
-    
-    Args:
-        claims (List[str]): List of claims to analyze
-        sources (List[str], optional): Shared context sources
+    try:
+        client = Groq(api_key=apikey)
         
-    Returns:
-        List[Dict[str, any]]: List of analysis results
-    """
-    results = []
-    for claim in claims:
-        result = classify_claim_with_groq(claim, sources)
-        results.append(result)
-    return results
+        prompt = f"Explain why the following statement is a {verdict}. These are the arguments: {', '.join(claims)}. Sources: {', '.join(sources[:3])}. Provide a short detailed explanation under 100 words."
 
-# Quick verification function for simple use cases
-def quick_verify(claim: str) -> str:
-    """
-    Quick claim verification without external sources.
-    
-    Args:
-        claim (str): The claim to verify
+        # Enforce rate limit before calling Groq API
+        with _request_lock:
+            now = time.time()
+            # remove timestamps outside the rolling window
+            while _request_timestamps and _request_timestamps[0] <= now - _WINDOW:
+                _request_timestamps.popleft()
+            # if reached max requests, wait until oldest timestamp expires
+            if len(_request_timestamps) >= _MAX_REQUESTS:
+                sleep_time = _WINDOW - (now - _request_timestamps[0])
+                time.sleep(sleep_time)
+                now = time.time()
+                while _request_timestamps and _request_timestamps[0] <= now - _WINDOW:
+                    _request_timestamps.popleft()
+            _request_timestamps.append(now)
         
-    Returns:
-        str: "FACT", "MYTH", "SCAM", or "UNCERTAIN"
-    """
-    return groq_fact_check(claim, sources=None)
-
-if __name__ == "__main__":
-    # Test the implementation
-    test_claim = "The Earth is flat"
-    
-    print("Testing Groq claim verification...")
-    result = get_detailed_groq_analysis(test_claim)
-    print(f"Detailed analysis: {json.dumps(result, indent=2)}")
-    
-    simple_result = groq_fact_check(test_claim)
-    print(f"Simple classification: {simple_result}")
+        # Call Groq API with Qwen3-32B model
+        completion = client.chat.completions.create(
+            model="qwen/qwen3-32b",
+            messages=[
+            {
+                "role": "system",
+                "content": "You are a highly accurate fact-checking AI that provides evidence-based analysis of claims. Always respond with valid JSON format."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+            ],
+            temperature=0.1,
+            max_tokens=512,
+            top_p=0.9
+        )
+        
+        response_text = completion.choices[0].message.content.strip()
+        
+        # Return the explanation text
+        return response_text
+                
+    except Exception as e:
+        print(f"Error generating explanation: {str(e)}")
+        return "Error generating explanation"
