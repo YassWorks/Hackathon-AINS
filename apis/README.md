@@ -10,15 +10,20 @@ The MYTH CHASER API is a sophisticated FastAPI-based backend that orchestrates m
 
 #### `POST /classify`
 **Main content verification endpoint**
-- **Input**: Text prompt + optional file uploads (images, audio)
+- **Input**: 
+  - Text prompt (required)
+  - File uploads (optional: images, audio)
+  - Source language (optional: auto, en, fr, ar, tunisian_ar, transliterated_ar)
 - **Output**: Structured response with verdict and explanation
-- **Processing**: Multi-threaded analysis using 5 AI models
+- **Processing**: Multi-threaded analysis using 7 AI models
 - **Response Format**:
   ```json
   {
     "Success": {
       "Verdict": "FACT|MYTH|SCAM",
-      "Explanation": "Detailed AI-generated explanation"
+      "Explanation": "Detailed AI-generated explanation",
+      "OriginalLanguage": "detected language",
+      "Confidence": 0.0-1.0
     }
   }
   ```
@@ -54,11 +59,21 @@ The MYTH CHASER API is a sophisticated FastAPI-based backend that orchestrates m
 - **Purpose**: Specialized misinformation pattern detection
 - **Confidence-based**: High confidence FAKE → SCAM, Low confidence → MYTH
 
-#### AI Explanation Generator
-- **Model**: `microsoft/phi-2`
-- **Purpose**: Generate human-readable explanations
-- **Input**: Final verdict + supporting evidence
-- **Output**: Detailed reasoning for the classification
+#### TunBERT Model
+- **Model**: `not-lain/TunBERT`
+- **Purpose**: Arabic and Tunisian dialect fact-checking
+- **Integration**: Direct processing of Arabic text
+- **Confidence**: Threshold-based classification (0.6)
+
+#### Groq LLM Integration
+- **Model**: `Groq Qwen3-32B`
+- **Purpose**: Advanced reasoning and verdict generation
+- **Weight**: 3x voting power in ensemble
+- **Features**: 
+  - Sophisticated claim analysis
+  - Evidence-based reasoning
+  - Detailed explanation generation
+  - Rate-limited API management (50 req/60s)
 
 ### 📁 Media Processing Pipeline
 
@@ -107,6 +122,7 @@ The MYTH CHASER API is a sophisticated FastAPI-based backend that orchestrates m
 - **PyTorch**: Deep learning framework
 - **Transformers**: Hugging Face model hub integration
 - **Sentence-Transformers**: Specialized embedding models
+- **Groq Python SDK**: LLM API integration
 - **PIL**: Image processing capabilities
 - **SpeechRecognition**: Audio processing toolkit
 
@@ -114,11 +130,13 @@ The MYTH CHASER API is a sophisticated FastAPI-based backend that orchestrates m
 - **ClaimBuster API**: Professional fact-checking service
 - **Google Fact Check API**: Global fact-checking database
 - **DuckDuckGo Search**: Privacy-focused web search
+- **Google Translate**: Multi-language translation
 
 ### Utilities
 - **python-dotenv**: Environment variable management
 - **requests**: HTTP client for API integrations
 - **pytesseract**: OCR text extraction
+- **googletrans**: Translation library
 - **spacy**: Advanced NLP preprocessing
 
 ## 📂 Project Structure

@@ -16,14 +16,16 @@ The MYTH CHASER frontend is a sleek, retro-gaming inspired web application built
 
 ### 📁 Advanced File Management
 - **Multi-Format Support**: Images (PNG, JPG, JPEG, GIF, WebP) and Audio (MP3, WAV, M4A, OGG)
+- **Multi-Language Support**: Arabic, French, and English text content
 - **Drag & Drop Interface**: Full-screen drop zones with visual feedback
-- **File Preview Modal**: Detailed file information with size and type display
+- **File Preview Modal**: Detailed file information with size, type and language display
 - **Batch Operations**: Multiple file selection and management
-- **Smart Filtering**: Automatic validation of supported file types
+- **Smart Filtering**: Automatic validation of supported file types and languages
 
 ### ⚡ Real-time Features
 - **Live Upload Progress**: Visual feedback during file operations
-- **Instant Validation**: Real-time file type and size checking
+- **Language Detection**: Automatic identification of input text language
+- **Instant Validation**: Real-time file type, size, and language checking 
 - **Error Handling**: Graceful error states with user-friendly messages
 - **Performance Monitoring**: Optimized rendering and state management
 
@@ -69,5 +71,6 @@ app/
 
 ### State Management
 - **Custom Hooks**: Encapsulated state logic for file uploads and form submission
+- **Multi-Language Support**: Language selection and automatic detection UI
 - **React State**: Local component state with proper lifting
 - **Type Safety**: Full TypeScript integration for all state operations
