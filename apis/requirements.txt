@@ -9,8 +9,10 @@ torchaudio
 
 duckduckgo-search
 requests
+groq
 
 Pillow
 pytesseract
 SpeechRecognition
 spacy
+googletrans
