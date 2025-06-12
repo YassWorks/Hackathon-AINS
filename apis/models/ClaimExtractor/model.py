@@ -90,13 +90,66 @@ class ClaimExtractor:
             
             # Decode claims
             decoded_claims = self.tokenizer.batch_decode(claims, skip_special_tokens=True)
-            claim_list = [s + "." for s in decoded_claims[0].split(".")]
-            logger.info(f"Extracted {len(claim_list)} claims from {len(text)} input(s)")
-            return claim_list
+            logger.debug(f"Decoded claims: {decoded_claims}")
+            print(f"Decoded claims: {decoded_claims}")
+
+            all_extracted_claims: List[str] = []
+            for decoded_text_block in decoded_claims:
+                if decoded_text_block.strip(): # Ensure block is not empty or just whitespace
+                    individual_claims_from_block = self.__sentance_split(decoded_text_block)
+                    all_extracted_claims.extend(individual_claims_from_block)
+            
+            logger.info(f"Extracted {len(all_extracted_claims)} claims from {len(text)} input text(s)")
+            return all_extracted_claims
             
         except Exception as e:
             logger.error(f"Error extracting claims: {e}")
             raise
+    def __sentance_split(self, text: str) -> List[str]:
+        """
+        Split text into sentences.
+        
+        Args:
+            text (str): The input text to split
+            
+        Returns:
+            List[str]: List of sentences
+        """
+        import re
+        alphabets= "([A-Za-z])"
+        prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
+        suffixes = "(Inc|Ltd|Jr|Sr|Co)"
+        starters = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He\s|She\s|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
+        acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
+        websites = "[.](com|net|org|io|gov|edu|me)"
+        digits = "([0-9])"
+        multiple_dots = r'\.{2,}'
+        text = " " + text + "  "
+        text = text.replace("\n"," ")
+        text = re.sub(prefixes,"\\1<prd>",text)
+        text = re.sub(websites,"<prd>\\1",text)
+        text = re.sub(digits + "[.]" + digits,"\\1<prd>\\2",text)
+        text = re.sub(multiple_dots, lambda match: "<prd>" * len(match.group(0)) + "<stop>", text)
+        if "Ph.D" in text: text = text.replace("Ph.D.","Ph<prd>D<prd>")
+        text = re.sub("\s" + alphabets + "[.] "," \\1<prd> ",text)
+        text = re.sub(acronyms+" "+starters,"\\1<stop> \\2",text)
+        text = re.sub(alphabets + "[.]" + alphabets + "[.]" + alphabets + "[.]","\\1<prd>\\2<prd>\\3<prd>",text)
+        text = re.sub(alphabets + "[.]" + alphabets + "[.]","\\1<prd>\\2<prd>",text)
+        text = re.sub(" "+suffixes+"[.] "+starters," \\1<stop> \\2",text)
+        text = re.sub(" "+suffixes+"[.]"," \\1<prd>",text)
+        text = re.sub(" " + alphabets + "[.]"," \\1<prd>",text)
+        if "”" in text: text = text.replace(".”","”.")
+        if "\"" in text: text = text.replace(".\"","\".")
+        if "!" in text: text = text.replace("!\"","\"!")
+        if "?" in text: text = text.replace("?\"","\"?")
+        text = text.replace(".",".<stop>")
+        text = text.replace("?","?<stop>")
+        text = text.replace("!","!<stop>")
+        text = text.replace("<prd>",".")
+        sentences = text.split("<stop>")
+        sentences = [s.strip() for s in sentences]
+        if sentences and not sentences[-1]: sentences = sentences[:-1]
+        return sentences
 
 # Global instance for backward compatibility
 _claim_extractor = None
