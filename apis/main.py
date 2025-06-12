@@ -257,7 +257,7 @@ async def verify_claim(
 
             # Voting logic for this claim with weighted votes
             labels = ["FACT", "MYTH", "SCAM"]
-            probs = [0, 0, 0]            # Count votes from each model
+            probs = [0, 0, 0]
             model_results = {
                 "NLI": result1,
                 "ClaimBuster": result2,
@@ -294,7 +294,8 @@ async def verify_claim(
             if result5 and result5 != "UNCERTAIN":
                 probs[labels.index(result5)] += 1
                 logger.debug(f"[{request_id}] TunBERT voted {result5} (weight: 1)")
-              # Groq Qwen3-32B (weight: 3 - highest voting power)
+            
+            # Groq Qwen3-32B (weight: 3 - highest voting power)
             if result6 and result6 != "UNCERTAIN":
                 probs[labels.index(result6)] += 3
                 logger.debug(f"[{request_id}] Groq voted {result6} (weight: 3)")
