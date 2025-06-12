@@ -5,3 +5,4 @@ test*
 run_pipeline.py
 *.jpg
 *.wav
+*.log

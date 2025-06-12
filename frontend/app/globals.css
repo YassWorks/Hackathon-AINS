@@ -27,7 +27,7 @@ body {
     font-family: "Pixelify Sans", monospace;
     background: var(--background);
     background-image: url('/pattern.png');
-    background-size: 40%; /* Zoom out by making it larger than 100% */
+    background-size: 40%;
     background-position: center;
     background-repeat: repeat;
     background-attachment: fixed;

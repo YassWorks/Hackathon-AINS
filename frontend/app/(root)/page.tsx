@@ -73,7 +73,8 @@ export default function Home() {
                     file={file}
                     onClose={closeFileList}
                     onRemoveFile={removeFile}
-                />                <div className="py-4">
+                />                
+                <div className="py-4">
                     {isLoading && <LoadingIndicator />}
                     {!isLoading && (
                         <ResponseSection answer={answer} verdict={verdict} explanation={explanation} />
