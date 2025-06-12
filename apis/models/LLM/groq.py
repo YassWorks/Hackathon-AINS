@@ -7,11 +7,11 @@ import time
 from threading import Lock
 from collections import deque
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Initialize Groq client
 
-client = Groq(api_key="REMOVED")
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
  
 # Rate limiter: max 50 requests per 60 seconds
 _MAX_REQUESTS = 50
